@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 
 
 public class DBComparer {
-  
+
     public static String pathdb1 = "resources/database.properties.1";
     public static String pathdb2 = "resources/database.properties.2";
 
@@ -32,18 +32,28 @@ public class DBComparer {
             DatabaseMetaData metaData1 = conn1.getMetaData();
             DatabaseMetaData metaData2 = conn2.getMetaData();
 
+            // tables
             ResultSet tablesdb1 = metaData1.getTables(null, db1_name, null, tipo);
             ResultSet tablesdb2 = metaData2.getTables(null, db2_name, null, tipo);
+            // columns
+            ResultSet columnsdb1 = metaData1.getColumns(null, null, null, null);
+            ResultSet columnsdb2 = metaData2.getColumns(null, null, null, null);
 
-            System.out.println(" tablas de la base de datos ");
-        // loop over tables result sets to compare
-        while(tablesdb1.next() || tablesdb2.next()) {
-            // check if both tables are identical
-            if (tablesdb1.equals(tablesdb2)) {
-                System.out.println("Las tablas de ambas bases de datos son iguales");
-            } else {
+            String tableName1;
+            String tableName2;
+            // loop over tables result sets to compare
+            while(tablesdb1.next() || tablesdb2.next()) {
+                // check if both tables are identical
+                if (tablesdb1.equals(tablesdb2)) {
+                    System.out.println("Las tablas de ambas bases de datos son iguales");
+                } else { // case for tables with the same name
+                    tableName1 = tablesdb1.getString("TABLE_NAME");
+                    tableName2 = tablesdb2.getString("TABLE_NAME");
+                    if (tableName1 == tableName2) {
 
-            }
+                    }
+
+                }
             
         }
         
