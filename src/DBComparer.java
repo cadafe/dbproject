@@ -44,12 +44,18 @@ public class DBComparer {
                 System.out.println("Las tablas de ambas bases de datos son iguales");
             } 
             else {
+                // catch boolean of .next() method for control conditions
+                Boolean avaibleTables1 = tablesdb1.next();
+                Boolean avaibleTables2 = tablesdb2.next();
+
                 // loop over tables result sets to compare
-                while(tablesdb1.next() || tablesdb2.next()) {
-                    if (tablesdb1.next() && tablesdb2.next()) {
+                while(avaibleTables1 || avaibleTables2) {
+                    if (avaibleTables1 && avaibleTables2) {
                         table1Name = tablesdb1.getString("TABLE_NAME");
                         table2Name = tablesdb2.getString("TABLE_NAME");
-                        if (table1Name == table2Name) {
+                        if (table1Name.equals(table2Name)) {
+                            System.out.println("Las tablas tienen el mismo nombre: "+table1Name);
+
                             // get columns of the tables with the same name
                             ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
                             ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
@@ -57,20 +63,25 @@ public class DBComparer {
                             if (columnsdb1.equals(columnsdb2)) 
                                 System.out.println("Las tablas "+table1Name+" y "+table2Name+" tienen las mismas columnas");
                             else {
-                                while (columnsdb1.next() || columnsdb2.next()){
-                                    if (columnsdb1.next() && columnsdb2.next()) {
+                                // catch boolean of .next() method for control conditions
+                                Boolean avaiblecolumns1 = columnsdb1.next();
+                                Boolean avaiblecolumns2 = columnsdb2.next();
+                                while (avaiblecolumns1 || avaiblecolumns2){
+                                    if (avaiblecolumns1 && avaiblecolumns2) {
                                         column1Name = columnsdb1.getString("COLUMN_NAME");
                                         column2Name = columnsdb2.getString("COLUMN_NAME");
                                         String datatype1 = columnsdb1.getString("DATA_TYPE"), datatype2=columnsdb2.getString("DATA_TYPE");
                                         // check data type of columns with the same name
-                                        if (column1Name == column2Name && datatype1 != datatype2) {
+                                        Boolean sameColumnsNames = column1Name.equals(column2Name);
+                                        Boolean sameColumnsTypes = datatype1.equals(datatype2);
+                                        if (sameColumnsNames && !sameColumnsTypes) {
                                             System.out.println(" ------------------------------------------------------ ");
                                             System.out.println("DIFERENCIA DE TIPOS: "+datatype1+"EN "+column1Name+" "+ db1_name+" Y "
                                             +datatype2+"EN "+column2Name+" "+ db2_name);
                                         }
                                     }
                                     // table1 has more columns than table2, list aditional ones
-                                    if (!columnsdb2.next()) {
+                                    if (!avaiblecolumns2) {
                                         System.out.println(" ------------------------------------------------------ ");
                                         System.out.println("COLUMNA ADICIONAL DE LA TABLA "+table1Name+" DE LA DB "+db1_name);
                                         System.out.println("Column name: "+columnsdb1.getString("COLUMN_NAME"));
@@ -81,7 +92,7 @@ public class DBComparer {
                                         System.out.println(" ------------------------------------------------------ ");
                                     }
                                     // table2 has more columns than table1, list aditional ones
-                                    if (!columnsdb1.next()) {
+                                    if (!avaiblecolumns1) {
                                         System.out.println(" ------------------------------------------------------ ");
                                         System.out.println("COLUMNA ADICIONAL DE LA TABLA "+table2Name+" DE LA DB "+db2_name);
                                         System.out.println("Column name: "+columnsdb2.getString("COLUMN_NAME"));
@@ -91,6 +102,9 @@ public class DBComparer {
                                         System.out.println("Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
                                         System.out.println(" ------------------------------------------------------ ");
                                     }
+                                    // moves each column cursor foward, if its possible
+                                    avaiblecolumns1 = columnsdb1.next();
+                                    avaiblecolumns2 = columnsdb2.next();
                                 }
                             }
 
@@ -98,7 +112,7 @@ public class DBComparer {
                         }
                     } 
                     // db1 has more tables than db2, list aditional ones
-                    if (!tablesdb2.next()) {
+                    if (!avaibleTables2) {
                         System.out.println(" ------------------------------------------------------ ");
                         System.out.println("TABLA ADICIONAL DE LA DB "+db1_name);
                         System.out.println("Catalog: " + tablesdb1.getString(1));
@@ -109,7 +123,7 @@ public class DBComparer {
                         System.out.println(" ------------------------------------------------------ ");
                     }
                     // db2 has more tables than db1, list aditional ones
-                    if (!tablesdb1.next()) {
+                    if (!avaibleTables1) {
                         System.out.println(" ------------------------------------------------------ ");
                         System.out.println("TABLA ADICIONAL DE LA DB "+db2_name);
                         System.out.println("Catalog: " + tablesdb2.getString(1));
@@ -119,11 +133,13 @@ public class DBComparer {
                         System.out.println("Remarks: " + tablesdb2.getString(5));
                         System.out.println(" ------------------------------------------------------ ");
                     }
-
-            }    
+                    // moves each table cursor foward, if its possible
+                    avaibleTables1 = tablesdb1.next();
+                    avaibleTables2 = tablesdb2.next();
+                }    
+            }
+        
         }
-    
-    }
         catch(SQLException sqle) {
             sqle.printStackTrace();
             System.err.println("Error connecting: " + sqle);
@@ -177,5 +193,4 @@ public class DBComparer {
             throw new IOException(e);
         }
     }
- 
 }
