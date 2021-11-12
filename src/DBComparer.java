@@ -35,26 +35,37 @@ public class DBComparer {
             // tables
             ResultSet tablesdb1 = metaData1.getTables(null, db1_name, null, tipo);
             ResultSet tablesdb2 = metaData2.getTables(null, db2_name, null, tipo);
-            // columns
-            ResultSet columnsdb1 = metaData1.getColumns(null, null, null, null);
-            ResultSet columnsdb2 = metaData2.getColumns(null, null, null, null);
+            
+            // names of the tables/columns String vars
+            String table1Name, table2Name, column1Name, column2Name;
+            
+            // check if both tables are identical
+            if (tablesdb1.equals(tablesdb2)) {
+                System.out.println("Las tablas de ambas bases de datos son iguales");
+            } 
+            else {
+                // loop over tables result sets to compare
+                while(tablesdb1.next() || tablesdb2.next()) {
+                    table1Name = tablesdb1.getString("TABLE_NAME");
+                    table2Name = tablesdb2.getString("TABLE_NAME");
+                    if (table1Name == table2Name) {
+                        // get columns of the tables with the same name
+                        ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
+                        ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
 
-            String tableName1;
-            String tableName2;
-            // loop over tables result sets to compare
-            while(tablesdb1.next() || tablesdb2.next()) {
-                // check if both tables are identical
-                if (tablesdb1.equals(tablesdb2)) {
-                    System.out.println("Las tablas de ambas bases de datos son iguales");
-                } else { // case for tables with the same name
-                    tableName1 = tablesdb1.getString("TABLE_NAME");
-                    tableName2 = tablesdb2.getString("TABLE_NAME");
-                    if (tableName1 == tableName2) {
+                        if (columnsdb1.equals(columnsdb2)) 
+                            System.out.println("Las tablas "+table1Name+" y "+table2Name+" tienen las mismas columnas");
+                        else {
+                            while (columnsdb1.next() || columnsdb2.next()){
+                                column1Name = columnsdb1.getString("COLUMN_NAME");
+                                column2Name = columnsdb2.getString("COLUMN_NAME");
+                            }
+                        }
+
 
                     }
 
-                }
-            
+            }    
         }
         
 
