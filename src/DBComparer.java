@@ -13,8 +13,8 @@ public class DBComparer {
 
     public static void main(String[] args) throws IOException {
         
-        Properties db1Props = getProperties(pathdb1); // Properties from "database.properties.1"
-        Properties db2Props = getProperties(pathdb2);   // Properties from "database.properties.2"
+        Properties db1Props = getProperties(pathdb1); // Properties from "database1.properties"
+        Properties db2Props = getProperties(pathdb2); // Properties from "database2.properties"
         // Initialize two connections to compare
         Connection conn1 = getConnection(db1Props); 
         Connection conn2 = getConnection(db2Props);
