@@ -46,31 +46,60 @@ public class DBComparer {
             else {
                 // loop over tables result sets to compare
                 while(tablesdb1.next() || tablesdb2.next()) {
-                    table1Name = tablesdb1.getString("TABLE_NAME");
-                    table2Name = tablesdb2.getString("TABLE_NAME");
-                    if (table1Name == table2Name) {
-                        // get columns of the tables with the same name
-                        ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
-                        ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
+                    if (tablesdb1 != null && tablesdb2 != null) {
+                        table1Name = tablesdb1.getString("TABLE_NAME");
+                        table2Name = tablesdb2.getString("TABLE_NAME");
+                        if (table1Name == table2Name) {
+                            // get columns of the tables with the same name
+                            ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
+                            ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
 
-                        if (columnsdb1.equals(columnsdb2)) 
-                            System.out.println("Las tablas "+table1Name+" y "+table2Name+" tienen las mismas columnas");
-                        else {
-                            while (columnsdb1.next() || columnsdb2.next()){
-                                column1Name = columnsdb1.getString("COLUMN_NAME");
-                                column2Name = columnsdb2.getString("COLUMN_NAME");
+                            if (columnsdb1.equals(columnsdb2)) 
+                                System.out.println("Las tablas "+table1Name+" y "+table2Name+" tienen las mismas columnas");
+                            else {
+                                while (columnsdb1.next() || columnsdb2.next()){
+                                    if (columnsdb1 != null && columnsdb2 != null) {
+                                        column1Name = columnsdb1.getString("COLUMN_NAME");
+                                        column2Name = columnsdb2.getString("COLUMN_NAME");
+                                        String datatype1 = columnsdb1.getString("DATA_TYPE"), datatype2=columnsdb2.getString("DATA_TYPE");
+                                        // check data type of columns with the same name
+                                        if (column1Name == column2Name && datatype1 != datatype2) {
+                                            System.out.println(" ------------------------------------------------------ ");
+                                            System.out.println("DIFERENCIA DE TIPOS: "+datatype1+"EN "+column1Name+" "+ db1_name+" Y "
+                                            +datatype2+"EN "+column2Name+" "+ db2_name);
+                                        }
+                                    }
+                                    if (columnsdb1 != null && columnsdb2 == null) {
+                                        System.out.println(" ------------------------------------------------------ ");
+                                        System.out.println("COLUMNA ADICIONAL DE LA TABLA "+table1Name+" DE LA DB "+db1_name);
+                                        System.out.println("Column name: "+columnsdb1.getString("COLUMN_NAME"));
+                                        System.out.println("Column size: "+columnsdb1.getString("COLUMN_SIZE"));
+                                        System.out.println("Column type: "+columnsdb1.getString("DATA_TYPE"));
+                                        System.out.println("Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
+                                        System.out.println("Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
+                                        System.out.println(" ------------------------------------------------------ ");
+                                    }
+                                    if (columnsdb1 == null && columnsdb2 != null) {
+                                        System.out.println(" ------------------------------------------------------ ");
+                                        System.out.println("COLUMNA ADICIONAL DE LA TABLA "+table2Name+" DE LA DB "+db2_name);
+                                        System.out.println("Column name: "+columnsdb2.getString("COLUMN_NAME"));
+                                        System.out.println("Column size: "+columnsdb2.getString("COLUMN_SIZE"));
+                                        System.out.println("Column type: "+columnsdb2.getString("DATA_TYPE"));
+                                        System.out.println("Is nullable: "+columnsdb2.getString("IS_NULLABLE"));
+                                        System.out.println("Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
+                                        System.out.println(" ------------------------------------------------------ ");
+                                    }
+                                }
                             }
+
+
                         }
-
-
-                    }
+                    } 
+                    // aca van 2 if mas con casos similares a los if de las columnas null nonull y nonull null
 
             }    
         }
-        
-
-        ResultSet dbcolumns = metaData1.getProcedureColumns(null,"procedimientos", "cursordemoAvanzado", null);
-        System.out.println(" tablas de la base de datos ");
+    
         
         catch(SQLException sqle) {
             sqle.printStackTrace();
