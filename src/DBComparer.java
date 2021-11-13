@@ -138,7 +138,90 @@ public class DBComparer {
                     avaibleTables2 = tablesdb2.next();
                 }    
             }
-        
+
+            ResultSet proceduresdb1 = metaData1.getProcedures(null, db1_name, null);
+            ResultSet proceduresdb2 = metaData2.getProcedures(null, db2_name, null);
+
+            // names of the procedures/functions String vars
+            String procedure1Name, procedure2Name;
+
+            if (proceduresdb1.equals(proceduresdb2)) {
+                System.out.println("Los procedimientos de ambas bases de datos son iguales.");
+            }
+            else {
+                Boolean avaibleProcedures1 = proceduresdb1.next();
+                Boolean avaibleProcedures2 = proceduresdb2.next();
+                while (avaibleProcedures1 || avaibleProcedures2) {
+                    if(avaibleProcedures1 && avaibleProcedures2) {
+                        procedure1Name = proceduresdb1.getString("PROCEDURE_NAME");
+                        procedure2Name = proceduresdb2.getString("PROCEDURE_NAME");
+                        if (procedure1Name.equals(procedure2Name)) {
+                            System.out.println("Los procedimientos tienen el mismo nombre: "+procedure1Name);
+                            ResultSet procColumnsdb1 = metaData1.getProcedureColumns(null, procedure1Name, null, null);
+                            ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, procedure2Name, null, null);
+                            if (procColumnsdb1.equals(procColumnsdb2)) {
+                                System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" tienen los mismos parametros.");
+                            }
+                            else {
+                                while (procColumnsdb1.next() || procColumnsdb2.next()) {
+                                    System.out.println("Parametros del procedimiento "+procedure1Name);
+                                    System.out.println("Catalogo: "+procColumnsdb1.getString(1));
+                                    System.out.println("Schema: "+procColumnsdb1.getString(2));
+                                    System.out.println("Name: "+procColumnsdb1.getString(3));
+                                    System.out.println("Column Name: "+procColumnsdb1.getString(4));
+                                    System.out.println("Column Type: "+procColumnsdb1.getShort(5));
+                                    System.out.println("Data Type: "+procColumnsdb1.getInt(6));
+                                    System.out.println("Type Name: "+procColumnsdb1.getString(7));
+
+                                    System.out.println("Parametros del procedimiento "+procedure2Name);
+                                    System.out.println("Catalogo: "+procColumnsdb2.getString(1));
+                                    System.out.println("Schema: "+procColumnsdb2.getString(2));
+                                    System.out.println("Name: "+procColumnsdb2.getString(3));
+                                    System.out.println("Column Name: "+procColumnsdb2.getString(4));
+                                    System.out.println("Column Type: "+procColumnsdb2.getShort(5));
+                                    System.out.println("Data Type: "+procColumnsdb2.getInt(6));
+                                    System.out.println("Type Name: "+procColumnsdb2.getString(7));
+                                }
+                            }
+                        }
+                        else {
+                            System.out.println("Procedimiento de la base de datos "+db1_name);
+                            System.out.println("Catalog: "+proceduresdb1.getString(1));
+                            System.out.println("Schema: "+proceduresdb1.getString(2));
+                            System.out.println("Name: "+proceduresdb1.getString(3));
+                            System.out.println("Comentarios: "+proceduresdb1.getString(4));
+                            System.out.println("Type: "+proceduresdb1.getShort(5));
+
+                            System.out.println("Procedimiento de la base de datos "+db2_name);
+                            System.out.println("Catalog: "+proceduresdb2.getString(1));
+                            System.out.println("Schema: "+proceduresdb2.getString(2));
+                            System.out.println("Name: "+proceduresdb2.getString(3));
+                            System.out.println("Comentarios: "+proceduresdb2.getString(4));
+                            System.out.println("Type: "+proceduresdb2.getShort(5));
+                        }
+                        avaibleProcedures1 = proceduresdb1.next();
+                        avaibleProcedures2 = proceduresdb2.next();
+                    }
+                    if(avaibleProcedures1 && !avaibleProcedures2) {
+                        System.out.println("Procedimiento de la base de datos "+db1_name);
+                        System.out.println("Catalog: "+proceduresdb1.getString(1));
+                        System.out.println("Schema: "+proceduresdb1.getString(2));
+                        System.out.println("Name: "+proceduresdb1.getString(3));
+                        System.out.println("Comentarios: "+proceduresdb1.getString(4));
+                        System.out.println("Type: "+proceduresdb1.getShort(5));
+                        avaibleProcedures1 = proceduresdb1.next();
+                    }
+                    if (!avaibleProcedures1 && avaibleProcedures2) {
+                        System.out.println("Procedimiento de la base de datos "+db2_name);
+                        System.out.println("Catalog: "+proceduresdb2.getString(1));
+                        System.out.println("Schema: "+proceduresdb2.getString(2));
+                        System.out.println("Name: "+proceduresdb2.getString(3));
+                        System.out.println("Comentarios: "+proceduresdb2.getString(4));
+                        System.out.println("Type: "+proceduresdb2.getShort(5));
+                        avaibleProcedures2 = proceduresdb2.next();
+                    }
+                }
+            }
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
