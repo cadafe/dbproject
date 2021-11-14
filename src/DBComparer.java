@@ -161,26 +161,56 @@ public class DBComparer {
                             ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, procedure2Name, null, null);
                             if (procColumnsdb1.equals(procColumnsdb2)) {
                                 System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" tienen los mismos parametros.");
+                                System.out.println("Column Name: "+procColumnsdb1.getString(4));
+                                System.out.println("Column Type: "+procColumnsdb1.getShort(5));
+                                System.out.println("Data Type: "+procColumnsdb1.getInt(6));
+                                System.out.println("Type Name: "+procColumnsdb1.getString(7));
                             }
                             else {
-                                while (procColumnsdb1.next() || procColumnsdb2.next()) {
-                                    System.out.println("Parametros del procedimiento "+procedure1Name);
-                                    System.out.println("Catalogo: "+procColumnsdb1.getString(1));
-                                    System.out.println("Schema: "+procColumnsdb1.getString(2));
-                                    System.out.println("Name: "+procColumnsdb1.getString(3));
-                                    System.out.println("Column Name: "+procColumnsdb1.getString(4));
-                                    System.out.println("Column Type: "+procColumnsdb1.getShort(5));
-                                    System.out.println("Data Type: "+procColumnsdb1.getInt(6));
-                                    System.out.println("Type Name: "+procColumnsdb1.getString(7));
-
-                                    System.out.println("Parametros del procedimiento "+procedure2Name);
-                                    System.out.println("Catalogo: "+procColumnsdb2.getString(1));
-                                    System.out.println("Schema: "+procColumnsdb2.getString(2));
-                                    System.out.println("Name: "+procColumnsdb2.getString(3));
-                                    System.out.println("Column Name: "+procColumnsdb2.getString(4));
-                                    System.out.println("Column Type: "+procColumnsdb2.getShort(5));
-                                    System.out.println("Data Type: "+procColumnsdb2.getInt(6));
-                                    System.out.println("Type Name: "+procColumnsdb2.getString(7));
+                                Boolean avaibleProcColumns1 = procColumnsdb1.next();
+                                Boolean avaibleProcColumns2 = procColumnsdb2.next();
+                                while (avaibleProcColumns1 || avaibleProcColumns2) {
+                                    if (avaibleProcColumns1 && avaibleProcColumns2) {
+                                        System.out.println("Parametros del procedimiento "+procedure1Name);
+                                        System.out.println("Catalogo: "+procColumnsdb1.getString(1));
+                                        System.out.println("Schema: "+procColumnsdb1.getString(2));
+                                        System.out.println("Name: "+procColumnsdb1.getString(3));
+                                        System.out.println("Column Name: "+procColumnsdb1.getString(4));
+                                        System.out.println("Column Type: "+procColumnsdb1.getShort(5));
+                                        System.out.println("Data Type: "+procColumnsdb1.getInt(6));
+                                        System.out.println("Type Name: "+procColumnsdb1.getString(7));
+    
+                                        System.out.println("Parametros del procedimiento "+procedure2Name);
+                                        System.out.println("Catalogo: "+procColumnsdb2.getString(1));
+                                        System.out.println("Schema: "+procColumnsdb2.getString(2));
+                                        System.out.println("Name: "+procColumnsdb2.getString(3));
+                                        System.out.println("Column Name: "+procColumnsdb2.getString(4));
+                                        System.out.println("Column Type: "+procColumnsdb2.getShort(5));
+                                        System.out.println("Data Type: "+procColumnsdb2.getInt(6));
+                                        System.out.println("Type Name: "+procColumnsdb2.getString(7));
+                                    }
+                                    if (!avaibleProcColumns2) {
+                                        System.out.println("Parametros del procedimiento "+procedure1Name);
+                                        System.out.println("Catalogo: "+procColumnsdb1.getString(1));
+                                        System.out.println("Schema: "+procColumnsdb1.getString(2));
+                                        System.out.println("Name: "+procColumnsdb1.getString(3));
+                                        System.out.println("Column Name: "+procColumnsdb1.getString(4));
+                                        System.out.println("Column Type: "+procColumnsdb1.getShort(5));
+                                        System.out.println("Data Type: "+procColumnsdb1.getInt(6));
+                                        System.out.println("Type Name: "+procColumnsdb1.getString(7));
+                                    }
+                                    if (!avaibleProcColumns1) {
+                                        System.out.println("Parametros del procedimiento "+procedure2Name);
+                                        System.out.println("Catalogo: "+procColumnsdb2.getString(1));
+                                        System.out.println("Schema: "+procColumnsdb2.getString(2));
+                                        System.out.println("Name: "+procColumnsdb2.getString(3));
+                                        System.out.println("Column Name: "+procColumnsdb2.getString(4));
+                                        System.out.println("Column Type: "+procColumnsdb2.getShort(5));
+                                        System.out.println("Data Type: "+procColumnsdb2.getInt(6));
+                                        System.out.println("Type Name: "+procColumnsdb2.getString(7));
+                                    }
+                                    avaibleProcColumns1 = procColumnsdb1.next();
+                                    avaibleProcColumns2 = procColumnsdb2.next();
                                 }
                             }
                         }
@@ -199,29 +229,74 @@ public class DBComparer {
                             System.out.println("Comentarios: "+proceduresdb2.getString(4));
                             System.out.println("Type: "+proceduresdb2.getShort(5));
                         }
-                        avaibleProcedures1 = proceduresdb1.next();
-                        avaibleProcedures2 = proceduresdb2.next();
                     }
-                    if(avaibleProcedures1 && !avaibleProcedures2) {
+                    if(!avaibleProcedures2) {
                         System.out.println("Procedimiento de la base de datos "+db1_name);
                         System.out.println("Catalog: "+proceduresdb1.getString(1));
                         System.out.println("Schema: "+proceduresdb1.getString(2));
                         System.out.println("Name: "+proceduresdb1.getString(3));
                         System.out.println("Comentarios: "+proceduresdb1.getString(4));
                         System.out.println("Type: "+proceduresdb1.getShort(5));
-                        avaibleProcedures1 = proceduresdb1.next();
                     }
-                    if (!avaibleProcedures1 && avaibleProcedures2) {
+                    if (!avaibleProcedures1) {
                         System.out.println("Procedimiento de la base de datos "+db2_name);
                         System.out.println("Catalog: "+proceduresdb2.getString(1));
                         System.out.println("Schema: "+proceduresdb2.getString(2));
                         System.out.println("Name: "+proceduresdb2.getString(3));
                         System.out.println("Comentarios: "+proceduresdb2.getString(4));
                         System.out.println("Type: "+proceduresdb2.getShort(5));
-                        avaibleProcedures2 = proceduresdb2.next();
                     }
+                    avaibleProcedures1 = proceduresdb1.next();
+                    avaibleProcedures2 = proceduresdb2.next();
                 }
             }
+
+            Statement stm1 = conn1.createStatement();
+            Statement stm2 = conn2.createStatement();
+            String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='db1_name'";
+            String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='db2_name'";
+            ResultSet triggersdb1 = stm1.executeQuery(query1);
+            ResultSet triggersdb2 = stm2.executeQuery(query2);
+
+            Boolean avaibleTriggers1 = triggersdb1.next(); 
+            Boolean avaibleTriggers2 = triggersdb2.next();
+            while (avaibleTriggers1 || avaibleTriggers2) {
+                if (avaibleTriggers1 && avaibleTriggers2) {
+                    System.out.println("Trigger de la base de datos "+db1_name);
+                    System.out.println("Catalogo: "+triggersdb1.getString("TRIGGER_CATALOG"));
+                    System.out.println("Schema: "+triggersdb1.getString("TRIGGER_SCHEMA"));
+                    System.out.println("Name: "+triggersdb1.getString("TRIGGER_NAME"));
+                    System.out.println("Evento: "+triggersdb1.getString("EVENT_MANIPULATION"));
+                    System.out.println("Momento de disparo: "+triggersdb1.getString("ACTION_CONDITION"));
+
+                    System.out.println("Trigger de la base de datos "+db2_name);
+                    System.out.println("Catalogo: "+triggersdb2.getString("TRIGGER_CATALOG"));
+                    System.out.println("Schema: "+triggersdb2.getString("TRIGGER_SCHEMA"));
+                    System.out.println("Name: "+triggersdb2.getString("TRIGGER_NAME"));
+                    System.out.println("Evento: "+triggersdb2.getString("EVENT_MANIPULATION"));
+                    System.out.println("Momento de disparo: "+triggersdb2.getString("ACTION_CONDITION"));
+                }
+                if (!avaibleTriggers2) {
+                    System.out.println("Trigger de la base de datos "+db1_name);
+                    System.out.println("Catalogo: "+triggersdb1.getString("TRIGGER_CATALOG"));
+                    System.out.println("Schema: "+triggersdb1.getString("TRIGGER_SCHEMA"));
+                    System.out.println("Name: "+triggersdb1.getString("TRIGGER_NAME"));
+                    System.out.println("Evento: "+triggersdb1.getString("EVENT_MANIPULATION"));
+                    System.out.println("Momento de disparo: "+triggersdb1.getString("ACTION_CONDITION"));
+                }
+                if (!avaibleTriggers1) {
+                    System.out.println("Trigger de la base de datos "+db2_name);
+                    System.out.println("Catalogo: "+triggersdb2.getString("TRIGGER_CATALOG"));
+                    System.out.println("Schema: "+triggersdb2.getString("TRIGGER_SCHEMA"));
+                    System.out.println("Name: "+triggersdb2.getString("TRIGGER_NAME"));
+                    System.out.println("Evento: "+triggersdb2.getString("EVENT_MANIPULATION"));
+                    System.out.println("Momento de disparo: "+triggersdb2.getString("ACTION_CONDITION"));
+                }
+                avaibleTriggers1 = triggersdb1.next();
+                avaibleTriggers2 = triggersdb2.next();
+            }
+
+
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
