@@ -111,117 +111,6 @@ public class DBComparer {
                 }
             }
 
-
-
-
-//                while (avaibleProcedures1 || avaibleProcedures2) {
-//                    if(avaibleProcedures1 && avaibleProcedures2) {
-//                        procedure1Name = proceduresdb1.getString("PROCEDURE_NAME");
-//                        procedure2Name = proceduresdb2.getString("PROCEDURE_NAME");
-//                        if (procedure1Name.equals(procedure2Name)) {
-//                            System.out.println("Los procedimientos tienen el mismo nombre: "+procedure1Name);
-//                            ResultSet procColumnsdb1 = metaData1.getProcedureColumns(null, procedure1Name, null, null);
-//                            ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, procedure2Name, null, null);
-//                            if (procColumnsdb1.equals(procColumnsdb2)) {
-//                                System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" tienen los mismos parametros.");
-//                                System.out.println("Column Name: "+procColumnsdb1.getString(4));
-//                                System.out.println("Column Type: "+procColumnsdb1.getShort(5));
-//                                System.out.println("Data Type: "+procColumnsdb1.getInt(6));
-//                                System.out.println("Type Name: "+procColumnsdb1.getString(7));
-//                            }
-//                            else {
-//                                Boolean avaibleProcColumns1 = procColumnsdb1.next();
-//                                Boolean avaibleProcColumns2 = procColumnsdb2.next();
-//                                while (avaibleProcColumns1 || avaibleProcColumns2) {
-//                                    if (avaibleProcColumns1 && avaibleProcColumns2) {
-//                                        System.out.println("Parametros del procedimiento "+procedure1Name);
-//                                        getInfoProcedureColumns(procColumnsdb1);
-//                                        /*System.out.println("Catalogo: "+procColumnsdb1.getString(1));
-//                                        System.out.println("Schema: "+procColumnsdb1.getString(2));
-//                                        System.out.println("Name: "+procColumnsdb1.getString(3));
-//                                        System.out.println("Column Name: "+procColumnsdb1.getString(4));
-//                                        System.out.println("Column Type: "+procColumnsdb1.getShort(5));
-//                                        System.out.println("Data Type: "+procColumnsdb1.getInt(6));
-//                                        System.out.println("Type Name: "+procColumnsdb1.getString(7));*/
-//    
-//                                        System.out.println("Parametros del procedimiento "+procedure2Name);
-//                                        getInfoProcedureColumns(procColumnsdb2);
-//                                        /*System.out.println("Catalogo: "+procColumnsdb2.getString(1));
-//                                        System.out.println("Schema: "+procColumnsdb2.getString(2));
-//                                        System.out.println("Name: "+procColumnsdb2.getString(3));
-//                                        System.out.println("Column Name: "+procColumnsdb2.getString(4));
-//                                        System.out.println("Column Type: "+procColumnsdb2.getShort(5));
-//                                        System.out.println("Data Type: "+procColumnsdb2.getInt(6));
-//                                        System.out.println("Type Name: "+procColumnsdb2.getString(7));*/
-//                                    }
-//                                    if (!avaibleProcColumns2) {
-//                                        System.out.println("Parametros del procedimiento "+procedure1Name);
-//                                        getInfoProcedureColumns(procColumnsdb1);
-//                                        /*System.out.println("Catalogo: "+procColumnsdb1.getString(1));
-//                                        System.out.println("Schema: "+procColumnsdb1.getString(2));
-//                                        System.out.println("Name: "+procColumnsdb1.getString(3));
-//                                        System.out.println("Column Name: "+procColumnsdb1.getString(4));
-//                                        System.out.println("Column Type: "+procColumnsdb1.getShort(5));
-//                                        System.out.println("Data Type: "+procColumnsdb1.getInt(6));
-//                                        System.out.println("Type Name: "+procColumnsdb1.getString(7));*/
-//                                    }
-//                                    if (!avaibleProcColumns1) {
-//                                        System.out.println("Parametros del procedimiento "+procedure2Name);
-//                                        getInfoProcedureColumns(procColumnsdb2);
-//                                        /*System.out.println("Catalogo: "+procColumnsdb2.getString(1));
-//                                        System.out.println("Schema: "+procColumnsdb2.getString(2));
-//                                        System.out.println("Name: "+procColumnsdb2.getString(3));
-//                                        System.out.println("Column Name: "+procColumnsdb2.getString(4));
-//                                        System.out.println("Column Type: "+procColumnsdb2.getShort(5));
-//                                        System.out.println("Data Type: "+procColumnsdb2.getInt(6));
-//                                        System.out.println("Type Name: "+procColumnsdb2.getString(7));*/
-//                                    }
-//                                    avaibleProcColumns1 = procColumnsdb1.next();
-//                                    avaibleProcColumns2 = procColumnsdb2.next();
-//                                }
-//                            }
-//                        }
-//                        else {
-//                            System.out.println("Procedimiento de la base de datos "+db1_name);
-//                            getInfoProcedure(proceduresdb1);
-//                            /*System.out.println("Catalog: "+proceduresdb1.getString(1));
-//                            System.out.println("Schema: "+proceduresdb1.getString(2));
-//                            System.out.println("Name: "+proceduresdb1.getString(3));
-//                            System.out.println("Comentarios: "+proceduresdb1.getString(4));
-//                            System.out.println("Type: "+proceduresdb1.getShort(5));*/
-//
-//                            System.out.println("Procedimiento de la base de datos "+db2_name);
-//                            getInfoProcedure(proceduresdb2);
-//                            /*System.out.println("Catalog: "+proceduresdb2.getString(1));
-//                            System.out.println("Schema: "+proceduresdb2.getString(2));
-//                            System.out.println("Name: "+proceduresdb2.getString(3));
-//                            System.out.println("Comentarios: "+proceduresdb2.getString(4));
-//                            System.out.println("Type: "+proceduresdb2.getShort(5));*/
-//                        }
-//                    }
-//                    if(!avaibleProcedures2) {
-//                        System.out.println("Procedimiento de la base de datos "+db1_name);
-//                        getInfoProcedure(proceduresdb1);
-//                        /*System.out.println("Catalog: "+proceduresdb1.getString(1));
-//                        System.out.println("Schema: "+proceduresdb1.getString(2));
-//                        System.out.println("Name: "+proceduresdb1.getString(3));
-//                        System.out.println("Comentarios: "+proceduresdb1.getString(4));
-//                        System.out.println("Type: "+proceduresdb1.getShort(5));*/
-//                    }
-//                    if (!avaibleProcedures1) {
-//                        System.out.println("Procedimiento de la base de datos "+db2_name);
-//                        getInfoProcedure(proceduresdb2);
-//                        /*System.out.println("Catalog: "+proceduresdb2.getString(1));
-//                        System.out.println("Schema: "+proceduresdb2.getString(2));
-//                        System.out.println("Name: "+proceduresdb2.getString(3));
-//                        System.out.println("Comentarios: "+proceduresdb2.getString(4));
-//                        System.out.println("Type: "+proceduresdb2.getShort(5));*/
-//                    }
-//                    avaibleProcedures1 = proceduresdb1.next();
-//                    avaibleProcedures2 = proceduresdb2.next();
-//                }
-//            }
-
             Statement stm1 = conn1.createStatement();
             Statement stm2 = conn2.createStatement();
             String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='db1_name'";
@@ -446,7 +335,7 @@ public class DBComparer {
                         }
                     }
                 }
-                // case of aditional table on db1
+                // case of aditional table in tablesdb1
                 if (!describedTable) {
                     System.out.println(" ------------------------------------------------------ ");
                     System.out.println("TABLA ADICIONAL DE LA DB "+db1_name);
@@ -459,7 +348,7 @@ public class DBComparer {
                 }
             }
 
-            // case of aditional table on db2
+            // case of aditional table in tablesdb2
             // reset the cursor of the tables from db2
             tablesdb2.beforeFirst();
             while (tablesdb2.next()) {
