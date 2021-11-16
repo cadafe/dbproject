@@ -177,8 +177,8 @@ public class DBComparer {
                         // Si el nombre de los procedimientos son iguales, muestro los perfiles
                         if (procedure1Name.equals(procedure2Name)) {
                             System.out.println("Hay dos procedimientos que tienen el mismo nombre: "+procedure1Name);
-                            ResultSet procColumnsdb1 = metaData1.getProcedureColumns(null, procedure1Name, null, null);
-                            ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, procedure2Name, null, null);
+                            ResultSet procColumnsdb1 = metaData1.getProcedureColumns(null, null, procedure1Name, null);
+                            ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, null, procedure2Name, null);
                             // Si los procedimientos tienen el mismo perfil, lo muestro
                             if (procColumnsdb1.equals(procColumnsdb2)) {
                                 System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" tienen los mismos parametros.");
