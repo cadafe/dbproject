@@ -23,7 +23,7 @@ public class DBComparer {
         String db1_name;
         String db2_name;
         db1_name = db1Props.getProperty("db_name");
-        db2_name = db1Props.getProperty("db_name");
+        db2_name = db2Props.getProperty("db_name");
 
 
         try {
@@ -76,8 +76,7 @@ public class DBComparer {
                                         Boolean sameColumnsTypes = datatype1.equals(datatype2);
                                         if (sameColumnsNames && !sameColumnsTypes) {
                                             System.out.println(" ------------------------------------------------------ ");
-                                            System.out.println("DIFERENCIA DE TIPOS: "+datatype1+"EN "+column1Name+" "+ db1_name+" Y "
-                                            +datatype2+"EN "+column2Name+" "+ db2_name);
+                                            System.out.println("DIFERENCIA DE TIPOS: "+db1_name+"->"+table1Name+"->"+column2Name+" tipo: "+datatype1+" VS "+db2_name+"->"+table2Name+"->"+column2Name+" tipo: "+datatype2);
                                         }
                                     }
                                     // table1 has more columns than table2, list aditional ones
