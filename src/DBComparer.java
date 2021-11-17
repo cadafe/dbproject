@@ -267,14 +267,16 @@ public class DBComparer {
 
             // set of visited common tables from both db
             Set<String> commonTables = new HashSet<String>();
-            
+            // flag to print aditional tables
+            Boolean describedTable = true;
+
             while(tablesdb1.next()) {
-                // flag to print aditional tables
-                Boolean describedTable = false;
+                describedTable = false;
                 // name of table from db1
                 table1Name = tablesdb1.getString("TABLE_NAME");
                 // loop for each table of ResultSet tablesdb1
-                while(tablesdb2.next()) {
+                tablesdb2.beforeFirst(); 
+                while(tablesdb2.next() && !describedTable) {
                     // name of table from db2
                     table2Name = tablesdb2.getString("TABLE_NAME");
                     // case of tables with the same name
@@ -287,10 +289,12 @@ public class DBComparer {
 
                         // set of visited common columns from both tables   
                         Set<String> commonColumns = new HashSet<String>();
+                        Boolean describedColumn = true;
                         while(columnsdb1.next()) {
-                            Boolean describedColumn = false;
+                            describedColumn = false;
                             column1Name = columnsdb1.getString("COLUMN_NAME");
-                            while(columnsdb2.next()) {
+                            columnsdb2.beforeFirst();
+                            while(columnsdb2.next() && !describedColumn) {
                                 column2Name = columnsdb2.getString("COLUMN_NAME");
                                 if (column1Name.equals(column2Name)) {
                                     // put into common columns set
