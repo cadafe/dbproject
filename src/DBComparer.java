@@ -284,10 +284,14 @@ public class DBComparer {
                         commonTables.add(table1Name);
                         ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
                         ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
-                        System.out.println("columns Getted from: "+table1Name+" and "+table2Name);
+                        System.out.println(" ------------------------------------------------------ ");
+                        System.out.println(" THE TABLES: "+db1_name+"/"+table1Name+" AND "+db2_name+"/"+table2Name+" HAVE THE SAME NAME!");
+                        System.out.println(" ------------------------------------------------------ ");
+
 
                         // set of visited common columns from both tables   
                         Set<String> commonColumns = new HashSet<String>();
+                        // flag to print aditional columns
                         Boolean columnDescribed = true;
                         while(columnsdb1.next() && table1Name.equals(columnsdb1.getString("TABLE_NAME"))) {
                             columnDescribed = false;
@@ -295,7 +299,6 @@ public class DBComparer {
                             columnsdb2.beforeFirst();
                             while(columnsdb2.next() && !columnDescribed && table2Name.equals(columnsdb2.getString("TABLE_NAME"))) {
                                 column2Name = columnsdb2.getString("COLUMN_NAME");
-                                System.out.println("test: "+table1Name+" -"+column1Name+" VS "+table2Name+" -"+column2Name);
                                 if (column1Name.equals(column2Name)) {
                                     // put into common columns set
                                     commonColumns.add(column1Name);
@@ -303,8 +306,12 @@ public class DBComparer {
                                     String datatype2 = columnsdb2.getString("DATA_TYPE");
                                     if (!datatype1.equals(datatype2)) {
                                         System.out.println(" ------------------------------------------------------ ");
-                                        System.out.println("DIFFERENCE OF TYPES BETWEEN COLUMNS: "+db1_name+"->"+table1Name+"->"+column2Name+" TYPE: "+datatype1
-                                        +" AND "+db2_name+"->"+table2Name+"->"+column2Name+" TYPE: "+datatype2);
+                                        System.out.println(" COLUMNS WITH THE SAME NAME BUT DIFFERENT TYPES!");
+                                        System.out.println(" "+db1_name+"/"+table1Name+"/"+column2Name+" TYPE: "+datatype1);
+                                        System.out.println(" "+db2_name+"/"+table2Name+"/"+column2Name+" TYPE: "+datatype2);
+                                        System.out.println(" ------------------------------------------------------ ");
+
+
                                         equalsDB = false;
                                     }
                                     columnDescribed = true;
@@ -313,12 +320,12 @@ public class DBComparer {
                             // case of aditional column into the first table
                             if (!columnDescribed) {
                                 System.out.println(" ------------------------------------------------------ ");
-                                System.out.println("ADITIONAL COLUMN INTO TABLE "+db1_name+"->"+table1Name);
-                                System.out.println("Column name: "+columnsdb1.getString("COLUMN_NAME"));
-                                System.out.println("Column size: "+columnsdb1.getString("COLUMN_SIZE"));
-                                System.out.println("Column type: "+columnsdb1.getString("DATA_TYPE"));
-                                System.out.println("Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
-                                System.out.println("Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
+                                System.out.println(" ADITIONAL COLUMN INTO TABLE "+db1_name+"/"+table1Name);
+                                System.out.println(" Column name: "+columnsdb1.getString("COLUMN_NAME"));
+                                System.out.println(" Column size: "+columnsdb1.getString("COLUMN_SIZE"));
+                                System.out.println(" Column type: "+columnsdb1.getString("DATA_TYPE"));
+                                System.out.println(" Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
+                                System.out.println(" Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
                                 System.out.println(" ------------------------------------------------------ ");
                                 equalsDB = false;
                             }
@@ -326,17 +333,17 @@ public class DBComparer {
                         table1Described = true;
                         // case of aditional column into the second table
                         columnsdb2.beforeFirst(); // resets the cursor of columnsdb2
-                        while (columnsdb2.next()) {
+                        while (columnsdb2.next() && table2Name.equals(columnsdb2.getString("TABLE_NAME"))) {
                             column2Name = columnsdb2.getString("COLUMN_NAME");
                             // check if the name was visited previously, if not print as aditional column
                             if (!commonColumns.contains(column2Name)) {
                                 System.out.println(" ------------------------------------------------------ ");
-                                System.out.println("ADITIONAL COLUMN INTO TABLE "+db2_name+"->"+table2Name);
-                                System.out.println("Column name: "+columnsdb2.getString("COLUMN_NAME"));
-                                System.out.println("Column size: "+columnsdb2.getString("COLUMN_SIZE"));
-                                System.out.println("Column type: "+columnsdb2.getString("DATA_TYPE"));
-                                System.out.println("Is nullable: "+columnsdb2.getString("IS_NULLABLE"));
-                                System.out.println("Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
+                                System.out.println(" ADITIONAL COLUMN INTO TABLE "+db2_name+"/"+table2Name);
+                                System.out.println(" Column name: "+columnsdb2.getString("COLUMN_NAME"));
+                                System.out.println(" Column size: "+columnsdb2.getString("COLUMN_SIZE"));
+                                System.out.println(" Column type: "+columnsdb2.getString("DATA_TYPE"));
+                                System.out.println(" Is nullable: "+columnsdb2.getString("IS_NULLABLE"));
+                                System.out.println(" Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
                                 System.out.println(" ------------------------------------------------------ ");
                                 equalsDB = false;
                             }
@@ -346,12 +353,12 @@ public class DBComparer {
                 // case of aditional table in tablesdb1
                 if (!table1Described) {
                     System.out.println(" ------------------------------------------------------ ");
-                    System.out.println("ADITIONAL TABLE INTO DB "+db1_name);
-                    System.out.println("Catalog: " + tablesdb1.getString(1));
-                    System.out.println("Schema: " + tablesdb1.getString(2));
-                    System.out.println("Name: " + tablesdb1.getString(3));
-                    System.out.println("Type: " + tablesdb1.getString(4));
-                    System.out.println("Remarks: " + tablesdb1.getString(5));
+                    System.out.println(" ADITIONAL TABLE INTO DB "+db1_name);
+                    System.out.println(" Catalog: " + tablesdb1.getString(1));
+                    System.out.println(" Schema: " + tablesdb1.getString(2));
+                    System.out.println(" Name: " + tablesdb1.getString(3));
+                    System.out.println(" Type: " + tablesdb1.getString(4));
+                    System.out.println(" Remarks: " + tablesdb1.getString(5));
                     System.out.println(" ------------------------------------------------------ ");
                     equalsDB = false;
                 }
@@ -365,12 +372,12 @@ public class DBComparer {
                 // check if the name was visited previously, if not print as aditional table
                 if (!commonTables.contains(table2Name)) {
                     System.out.println(" ------------------------------------------------------ ");
-                    System.out.println("ADITIONAL TABLE INTO DB "+db2_name);
-                    System.out.println("Catalog: " + tablesdb2.getString(1));
-                    System.out.println("Schema: " + tablesdb2.getString(2));
-                    System.out.println("Name: " + tablesdb2.getString(3));
-                    System.out.println("Type: " + tablesdb2.getString(4));
-                    System.out.println("Remarks: " + tablesdb2.getString(5));
+                    System.out.println(" ADITIONAL TABLE INTO DB "+db2_name);
+                    System.out.println(" Catalog: " + tablesdb2.getString(1));
+                    System.out.println(" Schema: " + tablesdb2.getString(2));
+                    System.out.println(" Name: " + tablesdb2.getString(3));
+                    System.out.println(" Type: " + tablesdb2.getString(4));
+                    System.out.println(" Remarks: " + tablesdb2.getString(5));
                     System.out.println(" ------------------------------------------------------ ");
                     equalsDB = false;
                 }
