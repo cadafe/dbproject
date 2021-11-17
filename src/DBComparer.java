@@ -256,7 +256,7 @@ public class DBComparer {
         String db2_name = db2Props.getProperty("db_name");
         
         String[] tipo = {"TABLE"};
-
+        Boolean equalsDB = true;
         try {
             // tables from db1 and db2
             ResultSet tablesdb1 = metaData1.getTables(null, db1_name, null, tipo);
@@ -269,7 +269,6 @@ public class DBComparer {
             Set<String> commonTables = new HashSet<String>();
             // flag to print aditional tables
             Boolean describedTable = true;
-
             while(tablesdb1.next()) {
                 describedTable = false;
                 // name of table from db1
@@ -305,6 +304,7 @@ public class DBComparer {
                                         System.out.println(" ------------------------------------------------------ ");
                                         System.out.println("DIFERENCIA DE TIPOS: "+db1_name+"->"+table1Name+"->"+column2Name+" tipo: "+datatype1
                                         +" VS "+db2_name+"->"+table2Name+"->"+column2Name+" tipo: "+datatype2);
+                                        equalsDB = false;
                                     }
                                     describedColumn = true;
                                 }
@@ -319,6 +319,7 @@ public class DBComparer {
                                 System.out.println("Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
                                 System.out.println("Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
                                 System.out.println(" ------------------------------------------------------ ");
+                                equalsDB = false;
                             }
                         }
                         // case of aditional column into the second table
@@ -335,6 +336,7 @@ public class DBComparer {
                                 System.out.println("Is nullable: "+columnsdb2.getString("IS_NULLABLE"));
                                 System.out.println("Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
                                 System.out.println(" ------------------------------------------------------ ");
+                                equalsDB = false;
                             }
                         }
                     }
@@ -349,6 +351,7 @@ public class DBComparer {
                     System.out.println("Type: " + tablesdb1.getString(4));
                     System.out.println("Remarks: " + tablesdb1.getString(5));
                     System.out.println(" ------------------------------------------------------ ");
+                    equalsDB = false;
                 }
             }
 
@@ -367,12 +370,20 @@ public class DBComparer {
                     System.out.println("Type: " + tablesdb2.getString(4));
                     System.out.println("Remarks: " + tablesdb2.getString(5));
                     System.out.println(" ------------------------------------------------------ ");
+                    equalsDB = false;
                 }
+            }
+            if (equalsDB) {
+                System.out.println(" ---------------------------------------------------- ");
+                System.out.println(" THE TABLES OF THE COMPARED DATA BASES ARE IDENTICAL! ");
+                System.out.println(" ---------------------------------------------------- ");
+
             }
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
             System.err.println("Error connecting: " + sqle);
         }
+
     }   
 }
