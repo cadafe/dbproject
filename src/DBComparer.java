@@ -349,6 +349,26 @@ public class DBComparer {
                                 equalsDB = false;
                             }
                         }
+
+                        // key comparation
+                        ResultSet pk1 = metaData1.getPrimaryKeys(null, null, table1Name);
+                        ResultSet pk2 = metaData2.getPrimaryKeys(null, null, table2Name);
+                        pk1.next();
+                        pk2.next();
+                        String columnpk1 = pk1.getString("COLUMN_NAME");
+                        String columnpk2 = pk2.getString("COLUMN_NAME");
+                        if (!columnpk1.equals(columnpk2)) {
+                            System.out.println(" ------------------------------------------------------ ");
+                            System.out.println(" DIFFERENCE BETWEEN PK KEYS ");
+                            System.out.println(" "+db1_name+"/"+table1Name+" PK COLUMN: "+columnpk1);
+                            System.out.println(" SEQUENCE NUMBER: "+pk1.getString("KEY_SEQ"));
+                            System.out.println(" "+db2_name+"/"+table2Name+" PK COLUMN: "+columnpk2);
+                            System.out.println(" SEQUENCE NUMBER: "+pk2.getString("KEY_SEQ"));
+                            System.out.println(" ------------------------------------------------------ ");
+                        }
+                        compareForeignKeys(metaData1, metaData2, table1Name, table2Name);
+
+
                     }
                 }
                 // case of aditional table in tablesdb1
@@ -396,4 +416,33 @@ public class DBComparer {
         }
 
     }   
+    private static void compareForeignKeys(DatabaseMetaData metaData1, DatabaseMetaData metaData2, String table1Name, String table2Name) throws SQLException {
+        ResultSet fk1 = metaData1.getImportedKeys(null, null, table1Name);
+        ResultSet fk2 = metaData2.getImportedKeys(null, null, table2Name);
+        while(fk1.next()) {
+            while(fk2.next()) {
+                String fk1column = fk1.getString("FKCOLUMN_NAME");
+                String fk2column = fk2.getString("FKCOLUMN_NAME");
+                String pk1table = fk1.getString("PKTABLE_NAME");
+                String pk2table = fk2.getString("PKTABLE_NAME");
+                String pk1column = fk1.getString("PKCOLUMN_NAME");
+                String pk2column = fk2.getString("PKCOLUMN_NAME");
+                if (fk1column.equals(fk2column) && !pk1table.equals(pk2table)) {
+                    System.out.println(" ---------------------------------------------------- ");
+                    System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT TABLES ");
+                    System.out.println(" "+table1Name+fk1column+" REFERENCES: "+pk1table);
+                    System.out.println(" "+table2Name+fk2column+" REFERENCES: "+pk1table);
+                    System.out.println(" ---------------------------------------------------- ");
+                }
+                if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && !pk1column.equals(pk2column)) {
+                    System.out.println(" ---------------------------------------------------- ");
+                    System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT COLUMNS ");
+                    System.out.println(" "+table1Name+fk1column+" REFERENCES: "+pk1column);
+                    System.out.println(" "+table2Name+fk2column+" REFERENCES: "+pk2column);
+                    System.out.println(" ---------------------------------------------------- ");
+            }
+        }
+
+    }
+
 }
