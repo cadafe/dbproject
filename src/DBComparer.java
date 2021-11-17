@@ -283,8 +283,8 @@ public class DBComparer {
                     if (table1Name.equals(table2Name)) {   
                         // put into common tables set
                         commonTables.add(table1Name);
-                        ResultSet columnsdb1 = metaData1.getColumns(null, table1Name, null, null);
-                        ResultSet columnsdb2 = metaData2.getColumns(null, table2Name, null, null);
+                        ResultSet columnsdb1 = metaData1.getColumns(null, null, table1Name, null);
+                        ResultSet columnsdb2 = metaData2.getColumns(null, null, table2Name, null);
                         System.out.println(" ------------------------------------------------------ ");
                         System.out.println(" THE TABLES: "+db1_name+"/"+table1Name+" AND "+db2_name+"/"+table2Name+" HAVE THE SAME NAME!");
                         System.out.println(" ------------------------------------------------------ ");
@@ -294,11 +294,11 @@ public class DBComparer {
                         Set<String> commonColumns = new HashSet<String>();
                         // flag to print aditional columns
                         Boolean columnDescribed = true;
-                        while(columnsdb1.next() && table1Name.equals(columnsdb1.getString("TABLE_NAME"))) {
+                        while(columnsdb1.next()) {
                             columnDescribed = false;
                             column1Name = columnsdb1.getString("COLUMN_NAME");
                             columnsdb2.beforeFirst();
-                            while(columnsdb2.next() && !columnDescribed && table2Name.equals(columnsdb2.getString("TABLE_NAME"))) {
+                            while(columnsdb2.next() && !columnDescribed) {
                                 column2Name = columnsdb2.getString("COLUMN_NAME");
                                 if (column1Name.equals(column2Name)) {
                                     // put into common columns set
