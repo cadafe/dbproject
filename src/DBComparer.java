@@ -33,29 +33,33 @@ public class DBComparer {
             
             ResultSet proceduresdb1 = metaData1.getProcedures(null, db1_name, null);
             ResultSet proceduresdb2 = metaData2.getProcedures(null, db2_name, null);
+            ResultSet procColumnsdb1, procColumnsdb2;
+            Boolean equalColumns = true;
+            Boolean avaibleProcedure1, avaibleProcedure2, avaibleProcColumns1, avaibleProcColumns2;
             String procedure1Name, procedure2Name;
+            
 
             if (proceduresdb1.equals(proceduresdb2)) {
                 System.out.println("Los procedimientos de ambas bases de datos son iguales.");
             }
             else {
-                Boolean avaibleProcedures1 = proceduresdb1.next();
-                Boolean avaibleProcedures2 = proceduresdb2.next();
-
-                // Imprimo todos los procedimientos
-                while (avaibleProcedures1 || avaibleProcedures2) {
-                    if (avaibleProcedures1 && avaibleProcedures2) {
-                        getInfoProcedure(proceduresdb1);
-                        getInfoProcedure(proceduresdb2);
-                    }
-                    if (!avaibleProcedures2) {
+                avaibleProcedure1 = proceduresdb1.next();
+                if (avaibleProcedure1) {
+                    // Imprimo los procedimientos de la primer base de datos
+                    System.out.println("Procedimientos de la base de datos: "+db1_name);
+                    proceduresdb1.previous();
+                    while (proceduresdb1.next()) {
                         getInfoProcedure(proceduresdb1);
                     }
-                    if (!avaibleProcedures1) {
+                }
+                avaibleProcedure2 = proceduresdb2.next();
+                if (avaibleProcedure2) {
+                    // Imprimo los procedimientos de la segunda base de datos
+                    System.out.println("Procedimientos de la base de datos: "+db2_name);
+                    proceduresdb2.previous();
+                    while (proceduresdb2.next()) {
                         getInfoProcedure(proceduresdb2);
                     }
-                    avaibleProcedures1 = proceduresdb1.next();
-                    avaibleProcedures2 = proceduresdb2.next();
                 }
 
                 // Me posiciono antes de la primera fila
@@ -70,23 +74,43 @@ public class DBComparer {
                         // Si el nombre de los procedimientos son iguales, muestro los perfiles
                         if (procedure1Name.equals(procedure2Name)) {
                             System.out.println("Hay dos procedimientos que tienen el mismo nombre: "+procedure1Name);
-                            ResultSet procColumnsdb1 = metaData1.getProcedureColumns(null, null, procedure1Name, null);
-                            ResultSet procColumnsdb2 = metaData2.getProcedureColumns(null, null, procedure2Name, null);
+                            procColumnsdb1 = metaData1.getProcedureColumns(null, null, procedure1Name, null);
+                            procColumnsdb2 = metaData2.getProcedureColumns(null, null, procedure2Name, null);
+                            avaibleProcColumns1 = procColumnsdb1.next();
+                            avaibleProcColumns2 = procColumnsdb2.next();
+                            //Verifico que los procedimientos con el mismo nombre, tengan el mismo perfil
+                            while ((avaibleProcColumns1 || avaibleProcColumns2) && equalColumns) {
+                                if (avaibleProcColumns1 && avaibleProcColumns2) {
+                                    if (procColumnsdb1.getString(4).equals(procColumnsdb2.getString(4)) || 
+                                        procColumnsdb1.getString(5).equals(procColumnsdb2.getString(5)) ||
+                                        procColumnsdb1.getString(5).equals(procColumnsdb2.getString(6)) ||
+                                        procColumnsdb1.getString(7).equals(procColumnsdb2.getString(7))) {
+                                        avaibleProcColumns1 = procColumnsdb1.next();
+                                        avaibleProcColumns2 = procColumnsdb2.next();
+                                    }
+                                    else {
+                                        equalColumns = false;
+                                    }
+                                }
+                                else {
+                                    equalColumns = false;
+                                }
+                                    
+                            }
+
+                            procColumnsdb1.beforeFirst();
+                            procColumnsdb2.beforeFirst();
                             // Si los procedimientos tienen el mismo perfil, lo muestro
-                            if (procColumnsdb1.equals(procColumnsdb2)) {
-                                System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" tienen los mismos parametros.");
+                            if (equalColumns) {
+                                System.out.println("Los procedimientos "+db1_name+"/"+procedure1Name+" y "+db2_name+"/"+procedure2Name+" tienen los mismos parametros.");
                                 while (procColumnsdb1.next()) {
-                                    System.out.println("Column Name: "+procColumnsdb1.getString(4));
-                                    System.out.println("Column Type: "+procColumnsdb1.getShort(5));
-                                    System.out.println("Data Type: "+procColumnsdb1.getInt(6));
-                                    System.out.println("Type Name: "+procColumnsdb1.getString(7));
+                                    System.out.println("Parametros del procedimiento "+procedure1Name);
+                                    getInfoProcedureColumns(procColumnsdb1);
                                 }
                             }
                             // Si los procedimientos no tienen los mismos perfiles, muestro los dos.
                             else {
-                                Boolean avaibleProcColumns1 = procColumnsdb1.next();
-                                Boolean avaibleProcColumns2 = procColumnsdb2.next();
-                                System.out.println("Los procedimientos "+procedure1Name+" y "+procedure2Name+" no tienen los mismos parametros.");
+                                System.out.println("Los procedimientos "+db1_name+"/"+procedure1Name+" y "+db2_name+"/"+procedure2Name+" no tienen los mismos parametros.");
                                 while (avaibleProcColumns1 || avaibleProcColumns2) {
                                     if (avaibleProcColumns1 && avaibleProcColumns2) {
                                         System.out.println("Parametros del procedimiento "+procedure1Name);
@@ -113,8 +137,8 @@ public class DBComparer {
 
             Statement stm1 = conn1.createStatement();
             Statement stm2 = conn2.createStatement();
-            String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='db1_name'";
-            String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='db2_name'";
+            String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db1_name+"'";
+            String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db2_name+"'";
             ResultSet triggersdb1 = stm1.executeQuery(query1);
             ResultSet triggersdb2 = stm2.executeQuery(query2);
 
@@ -124,37 +148,16 @@ public class DBComparer {
                 if (avaibleTriggers1 && avaibleTriggers2) {
                     System.out.println("Trigger de la base de datos "+db1_name);
                     getInfoTrigger(triggersdb1);
-                    /*System.out.println("Catalogo: "+triggersdb1.getString("TRIGGER_CATALOG"));
-                    System.out.println("Schema: "+triggersdb1.getString("TRIGGER_SCHEMA"));
-                    System.out.println("Name: "+triggersdb1.getString("TRIGGER_NAME"));
-                    System.out.println("Evento: "+triggersdb1.getString("EVENT_MANIPULATION"));
-                    System.out.println("Momento de disparo: "+triggersdb1.getString("ACTION_CONDITION"));*/
-
                     System.out.println("Trigger de la base de datos "+db2_name);
                     getInfoTrigger(triggersdb2);
-                    /*System.out.println("Catalogo: "+triggersdb2.getString("TRIGGER_CATALOG"));
-                    System.out.println("Schema: "+triggersdb2.getString("TRIGGER_SCHEMA"));
-                    System.out.println("Name: "+triggersdb2.getString("TRIGGER_NAME"));
-                    System.out.println("Evento: "+triggersdb2.getString("EVENT_MANIPULATION"));
-                    System.out.println("Momento de disparo: "+triggersdb2.getString("ACTION_CONDITION"));*/
                 }
                 if (!avaibleTriggers2) {
                     System.out.println("Trigger de la base de datos "+db1_name);
                     getInfoTrigger(triggersdb1);
-                    /*System.out.println("Catalogo: "+triggersdb1.getString("TRIGGER_CATALOG"));
-                    System.out.println("Schema: "+triggersdb1.getString("TRIGGER_SCHEMA"));
-                    System.out.println("Name: "+triggersdb1.getString("TRIGGER_NAME"));
-                    System.out.println("Evento: "+triggersdb1.getString("EVENT_MANIPULATION"));
-                    System.out.println("Momento de disparo: "+triggersdb1.getString("ACTION_CONDITION"));*/
                 }
                 if (!avaibleTriggers1) {
                     System.out.println("Trigger de la base de datos "+db2_name);
                     getInfoTrigger(triggersdb2);
-                    /*System.out.println("Catalogo: "+triggersdb2.getString("TRIGGER_CATALOG"));
-                    System.out.println("Schema: "+triggersdb2.getString("TRIGGER_SCHEMA"));
-                    System.out.println("Name: "+triggersdb2.getString("TRIGGER_NAME"));
-                    System.out.println("Evento: "+triggersdb2.getString("EVENT_MANIPULATION"));
-                    System.out.println("Momento de disparo: "+triggersdb2.getString("ACTION_CONDITION"));*/
                 }
                 avaibleTriggers1 = triggersdb1.next();
                 avaibleTriggers2 = triggersdb2.next();
@@ -176,7 +179,7 @@ public class DBComparer {
         System.out.println("Schema: "+trigger.getString("TRIGGER_SCHEMA"));
         System.out.println("Name: "+trigger.getString("TRIGGER_NAME"));
         System.out.println("Evento: "+trigger.getString("EVENT_MANIPULATION"));
-        System.out.println("Momento de disparo: "+trigger.getString("ACTION_CONDITION"));
+        System.out.println("Momento de disparo: "+trigger.getString("ACTION_TIMING"));
         System.out.println(" ------------------------------------------------------ ");
     }
 
@@ -192,8 +195,6 @@ public class DBComparer {
 
     private static void getInfoProcedureColumns(ResultSet procColumns) throws SQLException {
         System.out.println(" ------------------------------------------------------ ");
-        System.out.println("Catalogo: "+procColumns.getString(1));
-        System.out.println("Schema: "+procColumns.getString(2));
         System.out.println("Name: "+procColumns.getString(3));
         System.out.println("Column Name: "+procColumns.getString(4));
         System.out.println("Column Type: "+procColumns.getShort(5));
