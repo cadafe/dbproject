@@ -199,14 +199,13 @@ public class DBComparer {
                 }
                 // case of aditional table in tablesdb1
                 if (!table1Described) {
-                    System.out.println("  ");
                     System.out.println(" ADITIONAL TABLE INTO DB "+db1_name);
                     System.out.println(" Catalog: " + tablesdb1.getString(1));
                     System.out.println(" Schema: " + tablesdb1.getString(2));
                     System.out.println(" Name: " + tablesdb1.getString(3));
                     System.out.println(" Type: " + tablesdb1.getString(4));
                     System.out.println(" Remarks: " + tablesdb1.getString(5));
-                    System.out.println(" ------------------------------------------------------ ");
+                    System.out.println("  ");
                     equalsDB = false;
                 }
             }
@@ -218,19 +217,17 @@ public class DBComparer {
                 table2Name = tablesdb2.getString("TABLE_NAME");
                 // check if the name was visited previously, if not print as aditional table
                 if (!commonTables.contains(table2Name)) {
-                    System.out.println("  ");
                     System.out.println(" ADITIONAL TABLE INTO DB "+db2_name);
                     System.out.println(" Catalog: " + tablesdb2.getString(1));
                     System.out.println(" Schema: " + tablesdb2.getString(2));
                     System.out.println(" Name: " + tablesdb2.getString(3));
                     System.out.println(" Type: " + tablesdb2.getString(4));
                     System.out.println(" Remarks: " + tablesdb2.getString(5));
-                    System.out.println(" ------------------------------------------------------ ");
+                    System.out.println("  ");
                     equalsDB = false;
                 }
             }
             if (equalsDB) {
-                System.out.println(" ---------------------------------------------------- ");
                 System.out.println(" THE TABLES OF THE COMPARED DATA BASES ARE IDENTICAL! ");
                 System.out.println(" ---------------------------------------------------- ");
 
@@ -313,7 +310,7 @@ public class DBComparer {
                 System.out.println(" "+sch1+"/"+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
                 System.out.println(" UPDATE RULE: "+updaterule1);
                 System.out.println(" DELETE RULE: "+deleterule1);
-                System.out.println(" ---------------------------------------------------- ");
+                System.out.println("  ");
             }
         }
         fk2.beforeFirst();
@@ -330,7 +327,7 @@ public class DBComparer {
                 System.out.println(" "+sch2+"/"+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
                 System.out.println(" UPDATE RULE: "+updaterule2);
                 System.out.println(" DELETE RULE: "+deleterule2);
-                System.out.println(" ---------------------------------------------------- ");
+                System.out.println("  ");
             }
         }
 
@@ -502,7 +499,6 @@ public class DBComparer {
             Boolean avaibleTrigger2 = triggersdb2.next();
             // The triggers of the first database are printed
             if (avaibleTrigger1) {
-                System.out.println("--------------------------------------------------------------------");
                 System.out.println("Database triggers "+db1_name);
                 System.out.println(" ");
                 triggersdb1.previous();
@@ -511,7 +507,6 @@ public class DBComparer {
             }
             // The triggers of the second database are printed
             if (avaibleTrigger2) {
-                System.out.println("--------------------------------------------------------------------");
                 System.out.println("Database triggers "+db2_name);
                 System.out.println(" ");
                 triggersdb2.previous();
@@ -519,10 +514,7 @@ public class DBComparer {
                     getInfoTrigger(triggersdb2);
             }
             
-            System.out.println("--------------------------------------------------------------------");
-            System.out.println(" ");
-
-            // It is placed before the first row
+             // It is placed before the first row
             triggersdb1.beforeFirst();
             triggersdb2.beforeFirst();
     
@@ -537,7 +529,6 @@ public class DBComparer {
                 }
                 triggersdb2.beforeFirst();
             }
-            System.out.println("--------------------------------------------------------------------");
         } 
         catch(SQLException sqle) {
             sqle.printStackTrace();
