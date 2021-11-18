@@ -116,9 +116,9 @@ public class DBComparer {
                         commonTables.add(table1Name);
                         ResultSet columnsdb1 = metaData1.getColumns(null, null, table1Name, null);
                         ResultSet columnsdb2 = metaData2.getColumns(null, null, table2Name, null);
-                        System.out.println(" ------------------------------------------------------ ");
+                        System.out.println("--------------------------------------------------------------------");
                         System.out.println(" THE TABLES: "+db1_name+"/"+table1Name+" AND "+db2_name+"/"+table2Name+" HAVE THE SAME NAME!");
-                        System.out.println("  ");
+                        System.out.println(" ");
                         // set of visited common columns from both tables   
                         Set<String> commonColumns = new HashSet<String>();
                         // flag to print aditional columns
@@ -138,7 +138,7 @@ public class DBComparer {
                                         System.out.println(" COLUMNS WITH THE SAME NAME BUT DIFFERENT TYPES!");
                                         System.out.println(" "+db1_name+"/"+table1Name+"/"+column2Name+" TYPE: "+datatype1);
                                         System.out.println(" "+db2_name+"/"+table2Name+"/"+column2Name+" TYPE: "+datatype2);
-                                        System.out.println("  ");
+                                        System.out.println(" ---- ");
                                         equalsDB = false;
                                     }
                                     columnDescribed = true;
@@ -152,7 +152,7 @@ public class DBComparer {
                                 System.out.println(" Column type: "+columnsdb1.getString("DATA_TYPE"));
                                 System.out.println(" Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
                                 System.out.println(" Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
-                                System.out.println("  ");
+                                System.out.println(" ---- ");
                                 equalsDB = false;
                             }
                         }
@@ -169,12 +169,12 @@ public class DBComparer {
                                 System.out.println(" COLUMN TYPE: "+columnsdb2.getString("DATA_TYPE"));
                                 System.out.println(" IS NULLABLE: "+columnsdb2.getString("IS_NULLABLE"));
                                 System.out.println(" IS AUTOINCREMENT: "+columnsdb2.getString("IS_AUTOINCREMENT"));
-                                System.out.println("  ");
+                                System.out.println(" ---- ");
                                 equalsDB = false;
                             }
                         }
 
-                        // key comparation
+                        // pkey comparation
                         ResultSet pk1 = metaData1.getPrimaryKeys(null, null, table1Name);
                         ResultSet pk2 = metaData2.getPrimaryKeys(null, null, table2Name);
                         pk1.next();
@@ -183,18 +183,16 @@ public class DBComparer {
                         String columnpk2 = pk2.getString("COLUMN_NAME");
                         if (!columnpk1.equals(columnpk2)) {
                             System.out.println(" DIFFERENCE BETWEEN PK KEYS ");
-                            System.out.println("  ");
+                            System.out.println(" ");
                             System.out.println(" "+db1_name+"/"+table1Name+" PK COLUMN: "+columnpk1);
                             System.out.println(" SEQUENCE NUMBER: "+pk1.getString("KEY_SEQ"));
                             System.out.println(" "+db2_name+"/"+table2Name+" PK COLUMN: "+columnpk2);
                             System.out.println(" SEQUENCE NUMBER: "+pk2.getString("KEY_SEQ"));
-                            System.out.println("  ");
+                            System.out.println(" ---- ");
+                            equalsDB = false;
                         }
-                        compareForeignKeys(metaData1, metaData2, table1Name, table2Name);
+                        equalsDB = compareForeignKeys(metaData1, metaData2, table1Name, table2Name, equalsDB);
                         compareTriggers(db1_name, db2_name, stm1, stm2);
-
-
-
                     }
                 }
                 // case of aditional table in tablesdb1
@@ -205,7 +203,7 @@ public class DBComparer {
                     System.out.println(" Name: " + tablesdb1.getString(3));
                     System.out.println(" Type: " + tablesdb1.getString(4));
                     System.out.println(" Remarks: " + tablesdb1.getString(5));
-                    System.out.println("  ");
+                    System.out.println(" ---- ");
                     equalsDB = false;
                 }
             }
@@ -223,15 +221,15 @@ public class DBComparer {
                     System.out.println(" Name: " + tablesdb2.getString(3));
                     System.out.println(" Type: " + tablesdb2.getString(4));
                     System.out.println(" Remarks: " + tablesdb2.getString(5));
-                    System.out.println("  ");
+                    System.out.println(" ---- ");
                     equalsDB = false;
                 }
             }
             if (equalsDB) {
                 System.out.println(" THE TABLES OF THE COMPARED DATA BASES ARE IDENTICAL! ");
-                System.out.println(" ---------------------------------------------------- ");
-
             }
+            System.out.println("--------------------------------------------------------------------");
+
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
@@ -240,11 +238,13 @@ public class DBComparer {
 
     }   
     
-    private static void compareForeignKeys(DatabaseMetaData metaData1, DatabaseMetaData metaData2, String table1Name, String table2Name) throws SQLException {
+    private static Boolean compareForeignKeys(DatabaseMetaData metaData1, DatabaseMetaData metaData2, 
+    String table1Name, String table2Name, Boolean qdb) throws SQLException {
         ResultSet fk1 = metaData1.getImportedKeys(null, null, table1Name);
         ResultSet fk2 = metaData2.getImportedKeys(null, null, table2Name);
         Set<String> commonFk = new HashSet<String>();
         Boolean describedFk = true;
+        Boolean differentdb = qdb;
         String fk1column = "", fk2column = "", pk1table = "", pk2table = "", pk1column = "", 
         pk2column = "", updaterule1 = "", updaterule2 = "", deleterule1 = "", deleterule2 = "";
         while(fk1.next()) {
@@ -263,54 +263,64 @@ public class DBComparer {
                 deleterule2 = fk2.getString("DELETE_RULE");
                 if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && pk1column.equals(pk2column)) {
                     System.out.println(" FOREIGN KEYS FROM TABLE: "+table1Name+", HAVE THE SAME STRUCTURE ");
-                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
+                    System.out.println(" ");
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
+                    System.out.println(" ---- ");
                 }
                 if (fk1column.equals(fk2column) && !pk1table.equals(pk2table)) {
                     describedFk = true;
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT TABLES ");
-                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
-                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
-                    System.out.println("  ");
+                    System.out.println(" ");
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
+                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES "+pk2table+"/"+pk2column);
+                    System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
+                    differentdb = false;
                 }
                 if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && !pk1column.equals(pk2column)) {
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT COLUMNS ");
-                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
-                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
-                    System.out.println("  ");
+                    System.out.println(" ");
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
+                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES "+pk2table+"/"+pk2column);
+                    System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
+                    differentdb = false;
                 }
                 // same fkcolumn but different update rules
                 if (fk1column.equals(fk2column) && !deleterule1.equals(deleterule2)) {
-                    System.out.println(" DELETE RULES ARE DIFFERENT  ");
+                    System.out.println(" DELETE RULES ARE DIFFERENT ");
+                    System.out.println(" ");
                     System.out.println(" DELETE RULE 1: "+deleterule1+" VS "+ "DELETE RULE 2: "+deleterule2);
-                    System.out.println("  ");
+                    System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
+                    differentdb = false;
                 } 
                 // same fkcolumn but different delete rules
                 if (fk1column.equals(fk2column) && !updaterule1.equals(updaterule2)) {
                     System.out.println(" AND FK UPDATE RULES ARE DIFFERENT ");
+                    System.out.println(" ");
                     System.out.println(" UPDATE RULE 1: "+updaterule1+" VS "+ "UPDATE RULE 2: "+updaterule2);
-                    System.out.println("  ");
+                    System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
+                    differentdb = false;
                 }
             }
             if (!describedFk && fk1column != "") {
                 String sch1 = fk1.getString("FKTABLE_SCHEM");
-                System.out.println("  ");
                 System.out.println(" ADITIONAL FK IN THE FIRST TABLE");
                 pk1table = fk1.getString("PKTABLE_NAME");
                 pk1column = fk1.getString("PKCOLUMN_NAME");
                 updaterule1 = fk1.getString("UPDATE_RULE");
                 deleterule1 = fk1.getString("DELETE_RULE");
-                System.out.println(" "+sch1+"/"+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
+                System.out.println(" "+sch1+"/"+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
                 System.out.println(" UPDATE RULE: "+updaterule1);
                 System.out.println(" DELETE RULE: "+deleterule1);
-                System.out.println("  ");
+                System.out.println(" ---- ");
+                differentdb = false;
             }
         }
         fk2.beforeFirst();
@@ -318,18 +328,19 @@ public class DBComparer {
             pk2column = fk2.getString("FKCOLUMN_NAME");
             if (!commonFk.contains(pk2column)) {
                 String sch2 = fk2.getString("FKTABLE_SCHEM");
-                System.out.println("  ");
                 System.out.println(" ADITIONAL FK IN THE SECOND TABLE");
                 pk2table = fk2.getString("PKTABLE_NAME");
                 pk2column = fk2.getString("PKCOLUMN_NAME");
                 updaterule2 = fk2.getString("UPDATE_RULE");
                 deleterule2 = fk2.getString("DELETE_RULE");
-                System.out.println(" "+sch2+"/"+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
+                System.out.println(" "+sch2+"/"+table2Name+"/"+fk2column+" REFERENCES "+pk2table+"/"+pk2column);
                 System.out.println(" UPDATE RULE: "+updaterule2);
                 System.out.println(" DELETE RULE: "+deleterule2);
-                System.out.println("  ");
+                System.out.println(" ---- ");
+                differentdb = false;
             }
         }
+        return differentdb;
 
     }
 
@@ -339,7 +350,7 @@ public class DBComparer {
         System.out.println("Name: "+procedure.getString("PROCEDURE_NAME"));
         System.out.println("Remarks: "+procedure.getString("REMARKS"));
         System.out.println("Type: "+procedure.getShort("PROCEDURE_TYPE"));
-        System.out.println(" ");
+        System.out.println(" ---- ");
     }
     
     private static void getInfoProcedureColumns(ResultSet procColumns) throws SQLException {
@@ -349,7 +360,7 @@ public class DBComparer {
         System.out.println("Data Type: "+procColumns.getInt("DATA_TYPE"));
         System.out.println("Type Name: "+procColumns.getString("TYPE_NAME"));
         System.out.println("Is Nullable: "+procColumns.getShort("NULLABLE"));
-        System.out.println(" ");
+        System.out.println(" ---- ");
     }
     
     private static void compareProcedures(String db1_name, String db2_name, DatabaseMetaData metaData1, DatabaseMetaData metaData2) throws IOException {
@@ -366,7 +377,7 @@ public class DBComparer {
             if (avaibleProcedure1) {
                 System.out.println("--------------------------------------------------------------------");
                 System.out.println("Database procedures "+db1_name);
-                System.out.println(" ");
+                System.out.println(" ---- ");
                 proceduresdb1.previous();
                 while (proceduresdb1.next())
                     getInfoProcedure(proceduresdb1);
@@ -375,7 +386,7 @@ public class DBComparer {
             if (avaibleProcedure2) {
                 System.out.println("--------------------------------------------------------------------");
                 System.out.println("Database procedures "+db2_name);
-                System.out.println(" ");
+                System.out.println(" ---- ");
                 proceduresdb2.previous();
                 while (proceduresdb2.next())
                     getInfoProcedure(proceduresdb2);   
@@ -425,47 +436,47 @@ public class DBComparer {
                         // If the procedures have the same profile, only one is displayed
                         if (equalColumns) {
                             System.out.println("Procedures "+db1_name+"/"+procedure1Name+" and "+db2_name+"/"+procedure2Name+" have the same profile");
-                            System.out.println(" ");
+                            System.out.println(" ---- ");
                             avaibleProcColumns1 = procColumnsdb1.next();
                             if (avaibleProcColumns1) {
                                 System.out.println("Procedure parameters "+procedure1Name);
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                                 procColumnsdb1.previous();
                                 while (procColumnsdb1.next())
                                     getInfoProcedureColumns(procColumnsdb1);
                             }
                             else {
                                 System.out.println("Procedures have no parameters");
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                             }
                         }
                         // If the procedures do not have the same profiles, both are displayed
                         else {
                             System.out.println("Procedures "+db1_name+"/"+procedure1Name+" and "+db2_name+"/"+procedure2Name+" do not have the same profile");
-                            System.out.println(" ");
+                            System.out.println(" ---- ");
                             avaibleProcColumns1 = procColumnsdb1.next();
                             if (avaibleProcColumns1) {
                                 System.out.println("Procedure parameters "+db1_name+"/"+procedure1Name);
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                                 procColumnsdb1.previous();
                                 while (procColumnsdb1.next())
                                     getInfoProcedureColumns(procColumnsdb1);
                             }
                             else { 
                                 System.out.println("Procedure "+db1_name+"/"+procedure1Name+" has no parameters");
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                             }
                             avaibleProcColumns2 = procColumnsdb2.next();
                             if (avaibleProcColumns2) {
                                 System.out.println("Procedure parameters "+db2_name+"/"+procedure2Name);
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                                 procColumnsdb2.previous();
                                 while (procColumnsdb2.next())
                                     getInfoProcedureColumns(procColumnsdb2);
                             }
                             else {
                                 System.out.println("Procedure "+db2_name+"/"+procedure2Name+" has no parameters");
-                                System.out.println(" ");
+                                System.out.println(" ---- ");
                                 System.out.println("--------------------------------------------------------------------");
                             }
                         }
@@ -486,7 +497,7 @@ public class DBComparer {
         System.out.println("Name: "+trigger.getString("TRIGGER_NAME"));
         System.out.println("Event: "+trigger.getString("EVENT_MANIPULATION"));
         System.out.println("Shooting moment: "+trigger.getString("ACTION_TIMING"));
-        System.out.println(" ");
+        System.out.println(" ---- ");
     }
     
     private static void compareTriggers(String db1_name, String db2_name, Statement stm1, Statement stm2) throws IOException {
@@ -500,7 +511,7 @@ public class DBComparer {
             // The triggers of the first database are printed
             if (avaibleTrigger1) {
                 System.out.println("Database triggers "+db1_name);
-                System.out.println(" ");
+                System.out.println(" ---- ");
                 triggersdb1.previous();
                 while (triggersdb1.next())
                     getInfoTrigger(triggersdb1);
@@ -508,7 +519,7 @@ public class DBComparer {
             // The triggers of the second database are printed
             if (avaibleTrigger2) {
                 System.out.println("Database triggers "+db2_name);
-                System.out.println(" ");
+                System.out.println(" ---- ");
                 triggersdb2.previous();
                 while (triggersdb2.next())
                     getInfoTrigger(triggersdb2);
@@ -524,7 +535,7 @@ public class DBComparer {
                     if (triggersdb1.getString("TRIGGER_NAME").equals(triggersdb2.getString("TRIGGER_NAME")) ||
                         triggersdb1.getString("ACTION_TIMING").equals(triggersdb2.getString("ACTION_TIMING"))) {
                             System.out.println("The triggers "+db1_name+"/"+(triggersdb1.getString("TRIGGER_NAME"))+" and "+db2_name+"/"+(triggersdb2.getString("TRIGGER_NAME"))+" are the same");
-                            System.out.println(" ");
+                            System.out.println(" ---- ");
                     }
                 }
                 triggersdb2.beforeFirst();
