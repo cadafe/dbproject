@@ -118,7 +118,7 @@ public class DBComparer {
                         ResultSet columnsdb2 = metaData2.getColumns(null, null, table2Name, null);
                         System.out.println(" ------------------------------------------------------ ");
                         System.out.println(" THE TABLES: "+db1_name+"/"+table1Name+" AND "+db2_name+"/"+table2Name+" HAVE THE SAME NAME!");
-
+                        System.out.println("  ");
                         // set of visited common columns from both tables   
                         Set<String> commonColumns = new HashSet<String>();
                         // flag to print aditional columns
@@ -135,10 +135,10 @@ public class DBComparer {
                                     String datatype1 = columnsdb1.getString("DATA_TYPE");
                                     String datatype2 = columnsdb2.getString("DATA_TYPE");
                                     if (!datatype1.equals(datatype2)) {
-                                        System.out.println("  ");
                                         System.out.println(" COLUMNS WITH THE SAME NAME BUT DIFFERENT TYPES!");
                                         System.out.println(" "+db1_name+"/"+table1Name+"/"+column2Name+" TYPE: "+datatype1);
                                         System.out.println(" "+db2_name+"/"+table2Name+"/"+column2Name+" TYPE: "+datatype2);
+                                        System.out.println("  ");
                                         equalsDB = false;
                                     }
                                     columnDescribed = true;
@@ -146,14 +146,13 @@ public class DBComparer {
                             }
                             // case of aditional column into the first table
                             if (!columnDescribed) {
-                                System.out.println("  ");
                                 System.out.println(" ADITIONAL COLUMN INTO TABLE "+db1_name+"/"+table1Name);
                                 System.out.println(" Column name: "+columnsdb1.getString("COLUMN_NAME"));
                                 System.out.println(" Column size: "+columnsdb1.getString("COLUMN_SIZE"));
                                 System.out.println(" Column type: "+columnsdb1.getString("DATA_TYPE"));
                                 System.out.println(" Is nullable: "+columnsdb1.getString("IS_NULLABLE"));
                                 System.out.println(" Is autoincrement: "+columnsdb1.getString("IS_AUTOINCREMENT"));
-                                System.out.println(" ------------------------------------------------------ ");
+                                System.out.println("  ");
                                 equalsDB = false;
                             }
                         }
@@ -164,14 +163,13 @@ public class DBComparer {
                             column2Name = columnsdb2.getString("COLUMN_NAME");
                             // check if the name was visited previously, if not print as aditional column
                             if (!commonColumns.contains(column2Name)) {
-                                System.out.println("  ");
                                 System.out.println(" ADITIONAL COLUMN INTO TABLE "+db2_name+"/"+table2Name);
-                                System.out.println(" Column name: "+columnsdb2.getString("COLUMN_NAME"));
-                                System.out.println(" Column size: "+columnsdb2.getString("COLUMN_SIZE"));
-                                System.out.println(" Column type: "+columnsdb2.getString("DATA_TYPE"));
-                                System.out.println(" Is nullable: "+columnsdb2.getString("IS_NULLABLE"));
-                                System.out.println(" Is autoincrement: "+columnsdb2.getString("IS_AUTOINCREMENT"));
-                                System.out.println(" ------------------------------------------------------ ");
+                                System.out.println(" COLUMN NAME: "+columnsdb2.getString("COLUMN_NAME"));
+                                System.out.println(" COLUMN SIZE: "+columnsdb2.getString("COLUMN_SIZE"));
+                                System.out.println(" COLUMN TYPE: "+columnsdb2.getString("DATA_TYPE"));
+                                System.out.println(" IS NULLABLE: "+columnsdb2.getString("IS_NULLABLE"));
+                                System.out.println(" IS AUTOINCREMENT: "+columnsdb2.getString("IS_AUTOINCREMENT"));
+                                System.out.println("  ");
                                 equalsDB = false;
                             }
                         }
@@ -184,13 +182,13 @@ public class DBComparer {
                         String columnpk1 = pk1.getString("COLUMN_NAME");
                         String columnpk2 = pk2.getString("COLUMN_NAME");
                         if (!columnpk1.equals(columnpk2)) {
-                            System.out.println("  ");
                             System.out.println(" DIFFERENCE BETWEEN PK KEYS ");
                             System.out.println("  ");
                             System.out.println(" "+db1_name+"/"+table1Name+" PK COLUMN: "+columnpk1);
                             System.out.println(" SEQUENCE NUMBER: "+pk1.getString("KEY_SEQ"));
                             System.out.println(" "+db2_name+"/"+table2Name+" PK COLUMN: "+columnpk2);
                             System.out.println(" SEQUENCE NUMBER: "+pk2.getString("KEY_SEQ"));
+                            System.out.println("  ");
                         }
                         compareForeignKeys(metaData1, metaData2, table1Name, table2Name);
                         compareTriggers(db1_name, db2_name, stm1, stm2);
@@ -272,16 +270,14 @@ public class DBComparer {
                 }
                 if (fk1column.equals(fk2column) && !pk1table.equals(pk2table)) {
                     describedFk = true;
-                    System.out.println("  ");
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT TABLES ");
                     System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
                     System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
-                    System.out.println(" ---------------------------------------------------- ");
+                    System.out.println("  ");
                     commonFk.add(fk1column);
                     describedFk = true;
                 }
                 if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && !pk1column.equals(pk2column)) {
-                    System.out.println("  ");
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT COLUMNS ");
                     System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
                     System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
@@ -291,7 +287,6 @@ public class DBComparer {
                 }
                 // same fkcolumn but different update rules
                 if (fk1column.equals(fk2column) && !deleterule1.equals(deleterule2)) {
-                    System.out.println("  ");
                     System.out.println(" DELETE RULES ARE DIFFERENT  ");
                     System.out.println(" DELETE RULE 1: "+deleterule1+" VS "+ "DELETE RULE 2: "+deleterule2);
                     System.out.println("  ");
@@ -300,7 +295,6 @@ public class DBComparer {
                 } 
                 // same fkcolumn but different delete rules
                 if (fk1column.equals(fk2column) && !updaterule1.equals(updaterule2)) {
-                    System.out.println("  ");
                     System.out.println(" AND FK UPDATE RULES ARE DIFFERENT ");
                     System.out.println(" UPDATE RULE 1: "+updaterule1+" VS "+ "UPDATE RULE 2: "+updaterule2);
                     System.out.println("  ");
