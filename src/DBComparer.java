@@ -19,6 +19,10 @@ public class DBComparer {
         // Initialize two connections to compare
         Connection conn1 = getConnection(db1Props); 
         Connection conn2 = getConnection(db2Props);
+
+        // names of both db
+        String db1_name = db1Props.getProperty("db_name");
+        String db2_name = db2Props.getProperty("db_name");
         try {
             // get the metadata from both db
             DatabaseMetaData metaData1 = conn1.getMetaData();
@@ -27,8 +31,8 @@ public class DBComparer {
             Statement stm2 = conn2.createStatement();
             // method of tables comparison
             compareTables(metaData1, metaData2);
-            compareProcedures(metaData1, metaData2);
-            compareTriggers(stm1, stm2);
+            compareProcedures(db1_name, db2_name, metaData1, metaData2);
+            compareTriggers(db1_name, db2_name, stm1, stm2);
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
@@ -299,14 +303,7 @@ public class DBComparer {
         System.out.println(" ------------------------------------------------------ ");
     }
 
-    private static void compareProcedures(DatabaseMetaData metaData1, DatabaseMetaData metaData2) throws IOException {
-        Properties db1Props = getProperties(pathdb1); // Properties from "database1.properties"
-        Properties db2Props = getProperties(pathdb2); // Properties from "database2.properties"
-        
-        // names of both db
-        String db1_name = db1Props.getProperty("db_name");
-        String db2_name = db2Props.getProperty("db_name");
-        
+    private static void compareProcedures(String db1_name, String db2_name, DatabaseMetaData metaData1, DatabaseMetaData metaData2) throws IOException {
         try {
             
             ResultSet proceduresdb1 = metaData1.getProcedures(null, db1_name, null);
@@ -420,14 +417,7 @@ public class DBComparer {
         System.out.println(" ------------------------------------------------------ ");
     }
 
-    private static void compareTriggers(Statement stm1, Statement stm2) throws IOException {
-        Properties db1Props = getProperties(pathdb1); // Properties from "database1.properties"
-        Properties db2Props = getProperties(pathdb2); // Properties from "database2.properties"
-        
-        // names of both db
-        String db1_name = db1Props.getProperty("db_name");
-        String db2_name = db2Props.getProperty("db_name");
-        
+    private static void compareTriggers(String db1_name, String db2_name, Statement stm1, Statement stm2) throws IOException {
         try {
             String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db1_name+"'";
             String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db2_name+"'";
