@@ -32,6 +32,7 @@ public class DBComparer {
             // method of tables comparison
             compareTables(metaData1, metaData2, db1_name, db2_name);
             compareProcedures(db1_name, db2_name, metaData1, metaData2);
+            //compareFunctions(db1_name, db2_name, metaData1, metaData2);
             compareTriggers(db1_name, db2_name, stm1, stm2);
         }
         catch(SQLException sqle) {
@@ -377,6 +378,7 @@ public class DBComparer {
             //Imprimo los procedimientos de la primer base de datos
             if (avaibleProcedure1) {
                 System.out.println("Procedimientos de la base de datos: "+db1_name);
+                System.out.println(" ");
                 proceduresdb1.previous();
                 while (proceduresdb1.next())
                     getInfoProcedure(proceduresdb1);
@@ -384,6 +386,7 @@ public class DBComparer {
             //Imprimo los procedimientos de la segunda base de datos
             if (avaibleProcedure2) {
                 System.out.println("Procedimientos de la base de datos: "+db2_name);
+                System.out.println(" ");
                 proceduresdb2.previous();
                 while (proceduresdb2.next())
                     getInfoProcedure(proceduresdb2);
@@ -475,6 +478,145 @@ public class DBComparer {
                     }
                 }
                 proceduresdb2.beforeFirst();
+            }
+        }         
+        catch(SQLException sqle) {
+            sqle.printStackTrace();
+            System.err.println("Error connecting: " + sqle);
+        }
+    }
+
+    private static void getInfoFunction(ResultSet function) throws SQLException {
+        System.out.println("Catalog: "+function.getString(1));
+        System.out.println("Schema: "+function.getString(2));
+        System.out.println("Name: "+function.getString(3));
+        System.out.println("Description: "+function.getString(4));
+        System.out.println("Function Type: "+function.getShort(5));
+        System.out.println("--------------------------------------------------------------------");
+    }
+
+    private static void getInfoFunctionColumns(ResultSet funColumns) throws SQLException {
+        System.out.println("Name: "+funColumns.getString(3));
+        System.out.println("Column Name: "+funColumns.getString(4));
+        System.out.println("Column Type: "+funColumns.getShort(5));
+        System.out.println("Data Type: "+funColumns.getInt(6));
+        System.out.println("Type Name: "+funColumns.getString(7));
+        System.out.println("--------------------------------------------------------------------");
+    }
+
+    private static void compareFunctions(String db1_name, String db2_name, DatabaseMetaData metaData1, DatabaseMetaData metaData2) throws IOException {
+        try {
+            ResultSet functionsdb1 = metaData1.getFunctions(null, db1_name, null);
+            ResultSet functionsdb2 = metaData2.getFunctions(null, db2_name, null);
+            ResultSet funColumnsdb1, funColumnsdb2;
+            Boolean equalColumns = true;
+            Boolean avaibleFunColumns1, avaibleFunColumns2;
+            String function1Name, function2Name;
+            Boolean avaibleFunction1 = functionsdb1.next();
+            Boolean avaibleFunction2 = functionsdb2.next();
+            //Imprimo los procedimientos de la primer base de datos
+            if (avaibleFunction1) {
+                System.out.println("Funciones de la base de datos: "+db1_name);
+                System.out.println(" ");
+                functionsdb1.previous();
+                while (functionsdb1.next())
+                    getInfoFunction(functionsdb1);
+            }
+            //Imprimo los procedimientos de la segunda base de datos
+            if (avaibleFunction2) {
+                System.out.println("Funciones de la base de datos: "+db2_name);
+                System.out.println(" ");
+                functionsdb2.previous();
+                while (functionsdb2.next())
+                    getInfoFunction(functionsdb2);
+            }
+    
+            // Me posiciono antes de la primera fila
+            functionsdb1.beforeFirst();
+            functionsdb2.beforeFirst();
+    
+            // Verifico si hay procedimientos con el mismo nombre
+            while (functionsdb1.next()) {
+                while (functionsdb2.next()) {
+                    function1Name = functionsdb1.getString("FUNCTION_NAME");
+                    function2Name = functionsdb2.getString("FUNCTION_NAME");
+                    // Si el nombre de los procedimientos son iguales, muestro los perfiles
+                    if (function1Name.equals(function2Name)) {
+                        System.out.println("Hay dos funciones que tienen el mismo nombre: "+function1Name);
+                        funColumnsdb1 = metaData1.getFunctionColumns(null, null, function1Name, null);
+                        funColumnsdb2 = metaData2.getFunctionColumns(null, null, function2Name, null);
+                        avaibleFunColumns1 = funColumnsdb1.next();
+                        avaibleFunColumns2 = funColumnsdb2.next();
+                        //Verifico que los procedimientos con el mismo nombre, tengan el mismo perfil
+                        while ((avaibleFunColumns1 || avaibleFunColumns2) && equalColumns) {
+                            if (avaibleFunColumns1 && avaibleFunColumns2) {
+                                if (funColumnsdb1.getString(4).equals(funColumnsdb2.getString(4)) && 
+                                    funColumnsdb1.getString(5).equals(funColumnsdb2.getString(5)) &&
+                                    funColumnsdb1.getString(6).equals(funColumnsdb2.getString(6)) &&
+                                    funColumnsdb1.getString(7).equals(funColumnsdb2.getString(7))) {
+                                    avaibleFunColumns1 = funColumnsdb1.next();
+                                    avaibleFunColumns2 = funColumnsdb2.next();
+                                }
+                                else {
+                                    equalColumns = false;
+                                }
+                            }
+                            else {
+                                equalColumns = false;
+                            }
+                                
+                        }
+    
+                        funColumnsdb1.beforeFirst();
+                        funColumnsdb2.beforeFirst();
+                        // Si los procedimientos tienen el mismo perfil, lo muestro
+                        if (equalColumns) {
+                            System.out.println("Las funciones "+db1_name+"/"+function1Name+" y "+db2_name+"/"+function2Name+" tienen el mismo perfil.");
+                            avaibleFunColumns1 = funColumnsdb1.next();
+                            if (avaibleFunColumns1) {
+                                System.out.println("--------------------------------------------------------------------");
+                                System.out.println("Parametros de la funcion "+function1Name);
+                                System.out.println(" ");
+                                funColumnsdb1.previous();
+                                while (funColumnsdb1.next())
+                                    getInfoFunctionColumns(funColumnsdb1);
+                            }
+                            else {
+                                System.out.println("Las funciones no tienen parametros");
+                                System.out.println("--------------------------------------------------------------------");
+                            }
+                        }
+                        // Si los procedimientos no tienen los mismos perfiles, muestro los dos.
+                        else {
+                            System.out.println("Las funciones "+db1_name+"/"+function1Name+" y "+db2_name+"/"+function2Name+" no tienen el mismo perfil.");
+                            avaibleFunColumns1 = funColumnsdb1.next();
+                            if (avaibleFunColumns1) {
+                                System.out.println("Parametros de la funcion "+db1_name+"/"+function1Name);
+                                System.out.println(" ");
+                                funColumnsdb1.previous();
+                                while (funColumnsdb1.next())
+                                    getInfoFunctionColumns(funColumnsdb1);
+                            }
+                            else {
+                                System.out.println("La funcion "+db1_name+"/"+function1Name+" no tiene parametros");
+                                System.out.println("--------------------------------------------------------------------");
+                            }
+                            avaibleFunColumns2 = funColumnsdb2.next();
+                            if (avaibleFunColumns2) {
+                                System.out.println("Parametros de la funcion "+db2_name+"/"+function2Name);
+                                System.out.println(" ");
+                                funColumnsdb2.previous();
+                                while (funColumnsdb2.next())
+                                    getInfoFunctionColumns(funColumnsdb2);
+                            }
+                            else {
+                                System.out.println("La funcion "+db2_name+"/"+function2Name+" no tiene parametros");
+                                System.out.println("--------------------------------------------------------------------");
+                            }
+                        }
+                    }
+                }
+                functionsdb2.beforeFirst();
             }
         }         
         catch(SQLException sqle) {
