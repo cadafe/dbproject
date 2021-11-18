@@ -266,108 +266,51 @@ public class DBComparer {
                 pk2table = fk2.getString("PKTABLE_NAME");
                 pk1column = fk1.getString("PKCOLUMN_NAME");
                 pk2column = fk2.getString("PKCOLUMN_NAME");
-                try {
-                    updaterule1 = fk1.getString("UPDATE_RULE");
+                updaterule1 = fk1.getString("UPDATE_RULE");
+                updaterule2 = fk2.getString("UPDATE_RULE");
+                deleterule1 = fk1.getString("DELETE_RULE");
+                deleterule2 = fk2.getString("DELETE_RULE");
+                if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && pk1column.equals(pk2column)) {
+                    System.out.println(" FOREIGN KEYS FROM TABLE: "+table1Name+", HAVE THE SAME STRUCTURE ");
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
                 }
-                catch (Exception e) {  
-                    updaterule1 = "";
-                }  
-                try {
-                    updaterule2 = fk2.getString("UPDATE_RULE");
-                }
-                catch (Exception e) {  
-                    updaterule2 = "";
-                }  
-                try {
-                    deleterule1 = fk1.getString("DELETE_RULE");
-                }
-                catch (Exception e) {  
-                    deleterule1 = "";
-                }  
-                try {
-                    deleterule2 = fk2.getString("DELETE_RULE");
-                }
-                catch (Exception e) {  
-                    deleterule2 = "";
-                }  
-
                 if (fk1column.equals(fk2column) && !pk1table.equals(pk2table)) {
                     describedFk = true;
-                    System.out.println(" ---------------------------------------------------- ");
+                    System.out.println("  ");
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT TABLES ");
-                    System.out.println(" "+table1Name+fk1column+" REFERENCES: "+pk1table);
-                    System.out.println(" "+table2Name+fk2column+" REFERENCES: "+pk1table);
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
+                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
                     System.out.println(" ---------------------------------------------------- ");
                     commonFk.add(fk1column);
                     describedFk = true;
                 }
                 if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && !pk1column.equals(pk2column)) {
-                    System.out.println(" ---------------------------------------------------- ");
+                    System.out.println("  ");
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT COLUMNS ");
-                    System.out.println(" "+table1Name+fk1column+" REFERENCES: "+pk1column);
-                    System.out.println(" "+table2Name+fk2column+" REFERENCES: "+pk2column);
+                    System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES: "+pk1table+"/"+pk1column);
+                    System.out.println(" "+table2Name+"/"+fk2column+" REFERENCES: "+pk2table+"/"+pk2column);
                     System.out.println(" ---------------------------------------------------- ");
                     commonFk.add(fk1column);
                     describedFk = true;
                 }
-                Boolean havedr1 = !deleterule1.equals("");
-                Boolean havedr2 = !deleterule2.equals("");
-                if (havedr1 && havedr2) {
-                    if (fk1column.equals(fk2column) && !deleterule1.equals(deleterule2)) {
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK DELETE RULES ARE DIFFERENT ");
-                        System.out.println(" DELETE RULE 1: "+deleterule1+" VS "+ "DELETE RULE 2: "+deleterule2);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    } 
-                    if (!havedr1 && havedr2) {
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK 2 HAVE AN ADITIONAL DELETE RULE ");
-                        System.out.println(" DELETE RULE: "+deleterule2);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    }
-                    if (havedr1 && !havedr2) {                  
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK 1 HAVE AN ADITIONAL DELETE RULE ");
-                        System.out.println(" DELETE RULE: "+deleterule1);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    }
+                // same fkcolumn but different update rules
+                if (fk1column.equals(fk2column) && !deleterule1.equals(deleterule2)) {
+                    System.out.println("  ");
+                    System.out.println(" DELETE RULES ARE DIFFERENT! ");
+                    System.out.println(" DELETE RULE 1: "+deleterule1+" VS "+ "DELETE RULE 2: "+deleterule2);
+                    System.out.println(" ---------------------------------------------------- ");
+                    commonFk.add(fk1column);
+                    describedFk = true;
+                } 
+                // same fkcolumn but different delete rules
+                if (fk1column.equals(fk2column) && !updaterule1.equals(updaterule2)) {
+                    System.out.println("  ");
+                    System.out.println(" AND FK UPDATE RULES ARE DIFFERENT ");
+                    System.out.println(" UPDATE RULE 1: "+updaterule1+" VS "+ "UPDATE RULE 2: "+updaterule2);
+                    System.out.println(" ---------------------------------------------------- ");
+                    commonFk.add(fk1column);
+                    describedFk = true;
                 }
-
-                Boolean haveur1 = !updaterule1.equals("");
-                Boolean haveur2 = !updaterule2.equals("");
-                if (haveur1 && haveur2) {
-                    if (fk1column.equals(fk2column) && !updaterule1.equals(updaterule2)) {
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK UPDATE RULES ARE DIFFERENT ");
-                        System.out.println(" UPDATE RULE 1: "+updaterule1+" VS "+ "UPDATE RULE 2: "+updaterule2);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    }
-                    if (!haveur1 && haveur2) {
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK 2 HAVE AN ADITIONAL UPDATE RULE ");
-                        System.out.println(" DELETE RULE: "+updaterule2);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    }
-                    if (haveur1 && !haveur2) {                  
-                        System.out.println(" ---------------------------------------------------- ");
-                        System.out.println(" FK 1 HAVE AN ADITIONAL UPDATE RULE ");
-                        System.out.println(" DELETE RULE: "+updaterule1);
-                        System.out.println(" ---------------------------------------------------- ");
-                        commonFk.add(fk1column);
-                        describedFk = true;
-                    }
-                }
-
             }
             if (!describedFk && fk1column != "") {
                 String sch1 = fk1.getString("FKTABLE_SCHEM");
