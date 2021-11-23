@@ -137,14 +137,16 @@ public class DBComparer {
                                     Integer size1 = columnsdb1.getInt("COLUMN_SIZE");
                                     Integer size2 = columnsdb2.getInt("COLUMN_SIZE");
                                     if (!datatype1.equals(datatype2)) {
-                                        System.out.println(" COLUMNS WITH THE SAME NAME BUT DIFFERENT TYPES!");
+                                        System.out.println(" COLUMNS WITH THE SAME NAME BUT DIFFERENT TYPES:");
+                                        System.out.println("  ");
                                         System.out.println(" "+db1_name+"/"+table1Name+"/"+column1Name+" TYPE: "+datatype1+"("+size1+")");
                                         System.out.println(" "+db2_name+"/"+table2Name+"/"+column2Name+" TYPE: "+datatype2+"("+size2+")");
                                         System.out.println(" ---- ");
                                         equalsDB = false;
                                     }
                                     if (datatype1.equals(datatype2) && !size1.equals(size2)) {
-                                        System.out.println(" COLUMNS WITH THE SAME NAME AND TYPES, BUT DIFFERENT PRECISION!");
+                                        System.out.println(" COLUMNS WITH THE SAME NAME AND TYPE, BUT DIFFERENT PRECISION:");
+                                        System.out.println("  ");
                                         System.out.println(" "+db1_name+"/"+table1Name+"/"+column1Name+" TYPE: "+datatype1+"("+size1+")");
                                         System.out.println(" "+db2_name+"/"+table2Name+"/"+column2Name+" TYPE: "+datatype2+"("+size2+")");
                                         System.out.println(" ---- ");
