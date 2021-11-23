@@ -203,7 +203,7 @@ public class DBComparer {
                             equalsDB = false;
                         }
                         equalsDB = compareForeignKeys(metaData1, metaData2, table1Name, table2Name, equalsDB);
-                        equalsDB = compareTriggers(table1Name, table2Name, stm1, stm2, equalsDB);
+                        equalsDB = compareTriggers(table1Name, table2Name, stm1, stm2, db1_name, db2_name, equalsDB);
                     }
                 }
                 // case of aditional table in tablesdb1
@@ -277,9 +277,9 @@ public class DBComparer {
                     System.out.println(" ");
                     System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
                     System.out.println(" ---- ");
+                    describedFk = true;
                 }
                 if (fk1column.equals(fk2column) && !pk1table.equals(pk2table)) {
-                    describedFk = true;
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT TABLES ");
                     System.out.println(" ");
                     System.out.println(" "+table1Name+"/"+fk1column+" REFERENCES "+pk1table+"/"+pk1column);
@@ -512,9 +512,9 @@ public class DBComparer {
     }
     
     private static Boolean compareTriggers(String table1Name, String table2Name, 
-    Statement stm1, Statement stm2, Boolean qdb) throws IOException, SQLException {
-        String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table1Name+"'";
-        String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table2Name+"'";
+    Statement stm1, Statement stm2, String db1_name, String db2_name, Boolean qdb) throws IOException, SQLException {
+        String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table1Name+"' AND TRIGGER_SCHEMA='"+db1_name+"'";
+        String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table2Name+"' AND TRIGGER_SCHEMA='"+db2_name+"'";
         ResultSet triggersdb1 = stm1.executeQuery(query1);
         ResultSet triggersdb2 = stm2.executeQuery(query2);
         Set<String> commonTriggers = new HashSet<String>();
@@ -529,25 +529,29 @@ public class DBComparer {
                 trigg2Name = triggersdb2.getString("TRIGGER_NAME");
                 trigg1ActionT = triggersdb1.getString("ACTION_TIMING");
                 trigg2ActionT = triggersdb2.getString("ACTION_TIMING");
-                if (trigg1Name.equals(trigg2Name) && trigg1ActionT.equals(trigg2ActionT)){
-                    System.out.println("THE TRIGGERS FROM TABLES NAMED: "+table1Name+" ARE THE SAME");
-                    System.out.println(" ");
-                    System.out.println("Trigger name: "+trigg1Name);
-                    System.out.println("action timing: "+trigg1ActionT);
-                    System.out.println(" ---- ");
-                    describedTrigg = true;
-                    commonTriggers.add(trigg1Name);
-                }
-                if (trigg1Name.equals(trigg2Name) && !trigg1ActionT.equals(trigg2ActionT)){
-                    System.out.println("THE TRIGGERS FROM TABLES NAMED: "+table1Name+" HAVE THE SAME NAME: "+trigg1Name);
-                    System.out.println(" ");
-                    System.out.println("BUT DIFFERENT SHOOTING MOMENTS");
-                    System.out.println("Shooting moment trigger1: "+trigg1ActionT);
-                    System.out.println("Shooting moment trigger2: "+trigg2ActionT);
-                    System.out.println(" ---- ");
-                    describedTrigg = true;
-                    commonTriggers.add(trigg1Name);
-                    equalsdb = false;
+                if (trigg1Name.equals(trigg2Name)) {
+                    if (trigg1ActionT.equals(trigg2ActionT)){
+                        System.out.println(" ");
+                        System.out.println("THE TABLES WITH NAME: "+table1Name+", HAVE THE FOLLOWING TRIGGER IN COMMON:");
+                        System.out.println(" ");
+                        System.out.println("Trigger name: "+trigg1Name);
+                        System.out.println("action timing: "+trigg1ActionT);
+                        System.out.println(" ---- ");
+                        describedTrigg = true;
+                        commonTriggers.add(trigg1Name);
+                    } else {
+                        System.out.println(" ");
+                        System.out.println("COMMON TABLE: "+table1Name+" HAVE A EQUALLY NAMED TRIGGER: "+trigg1Name);
+                        System.out.println(" ");
+                        System.out.println("BUT WITH DIFFERENT SHOOTING MOMENTS");
+                        System.out.println(" ");
+                        System.out.println("Shooting moment trigger1: "+trigg1ActionT);
+                        System.out.println("Shooting moment trigger2: "+trigg2ActionT);
+                        System.out.println(" ---- ");
+                        describedTrigg = true;
+                        commonTriggers.add(trigg1Name);
+                        equalsdb = false;
+                    }
                 }
             }
             // aditional trigger from first table
