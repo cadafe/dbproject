@@ -192,7 +192,7 @@ public class DBComparer {
                             equalsDB = false;
                         }
                         equalsDB = compareForeignKeys(metaData1, metaData2, table1Name, table2Name, equalsDB);
-                        compareTriggers(db1_name, db2_name, stm1, stm2);
+                        equalsDB = compareTriggers(table1Name, table2Name, stm1, stm2, equalsDB);
                     }
                 }
                 // case of aditional table in tablesdb1
@@ -244,7 +244,7 @@ public class DBComparer {
         ResultSet fk2 = metaData2.getImportedKeys(null, null, table2Name);
         Set<String> commonFk = new HashSet<String>();
         Boolean describedFk = true;
-        Boolean differentdb = qdb;
+        Boolean equalsdb = qdb;
         String fk1column = "", fk2column = "", pk1table = "", pk2table = "", pk1column = "", 
         pk2column = "", updaterule1 = "", updaterule2 = "", deleterule1 = "", deleterule2 = "";
         while(fk1.next()) {
@@ -276,7 +276,7 @@ public class DBComparer {
                     System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
-                    differentdb = false;
+                    equalsdb = false;
                 }
                 if (fk1column.equals(fk2column) && pk1table.equals(pk2table) && !pk1column.equals(pk2column)) {
                     System.out.println(" FOREIGN KEYS REFERENCING DIFFERENT COLUMNS ");
@@ -286,7 +286,7 @@ public class DBComparer {
                     System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
-                    differentdb = false;
+                    equalsdb = false;
                 }
                 // same fkcolumn but different update rules
                 if (fk1column.equals(fk2column) && !deleterule1.equals(deleterule2)) {
@@ -296,7 +296,7 @@ public class DBComparer {
                     System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
-                    differentdb = false;
+                    equalsdb = false;
                 } 
                 // same fkcolumn but different delete rules
                 if (fk1column.equals(fk2column) && !updaterule1.equals(updaterule2)) {
@@ -306,7 +306,7 @@ public class DBComparer {
                     System.out.println(" ---- ");
                     commonFk.add(fk1column);
                     describedFk = true;
-                    differentdb = false;
+                    equalsdb = false;
                 }
             }
             if (!describedFk && fk1column != "") {
@@ -320,7 +320,7 @@ public class DBComparer {
                 System.out.println(" UPDATE RULE: "+updaterule1);
                 System.out.println(" DELETE RULE: "+deleterule1);
                 System.out.println(" ---- ");
-                differentdb = false;
+                equalsdb = false;
             }
         }
         fk2.beforeFirst();
@@ -337,10 +337,10 @@ public class DBComparer {
                 System.out.println(" UPDATE RULE: "+updaterule2);
                 System.out.println(" DELETE RULE: "+deleterule2);
                 System.out.println(" ---- ");
-                differentdb = false;
+                equalsdb = false;
             }
         }
-        return differentdb;
+        return equalsdb;
 
     }
 
@@ -500,50 +500,60 @@ public class DBComparer {
         System.out.println(" ---- ");
     }
     
-    private static void compareTriggers(String db1_name, String db2_name, Statement stm1, Statement stm2) throws IOException {
-        try {
-            String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db1_name+"'";
-            String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA='"+db2_name+"'";
-            ResultSet triggersdb1 = stm1.executeQuery(query1);
-            ResultSet triggersdb2 = stm2.executeQuery(query2);
-            Boolean avaibleTrigger1 = triggersdb1.next();
-            Boolean avaibleTrigger2 = triggersdb2.next();
-            // The triggers of the first database are printed
-            if (avaibleTrigger1) {
-                System.out.println("Database triggers "+db1_name);
-                System.out.println(" ---- ");
-                triggersdb1.previous();
-                while (triggersdb1.next())
-                    getInfoTrigger(triggersdb1);
-            }
-            // The triggers of the second database are printed
-            if (avaibleTrigger2) {
-                System.out.println("Database triggers "+db2_name);
-                System.out.println(" ---- ");
-                triggersdb2.previous();
-                while (triggersdb2.next())
-                    getInfoTrigger(triggersdb2);
-            }
-            
-             // It is placed before the first row
-            triggersdb1.beforeFirst();
+    private static Boolean compareTriggers(String table1Name, String table2Name, 
+    Statement stm1, Statement stm2, Boolean qdb) throws IOException, SQLException {
+        String query1 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table1Name+"'";
+        String query2 = "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_TABLE='"+table2Name+"'";
+        ResultSet triggersdb1 = stm1.executeQuery(query1);
+        ResultSet triggersdb2 = stm2.executeQuery(query2);
+        Set<String> commonTriggers = new HashSet<String>();
+        Boolean describedTrigg = true;
+        Boolean equalsdb = qdb;
+        String trigg1Name, trigg2Name, trigg1ActionT, trigg2ActionT;
+        while(triggersdb1.next()) {
+            describedTrigg = false;
             triggersdb2.beforeFirst();
-    
-            // Equal triggers are verified
-            while (triggersdb1.next()) {
-                while (triggersdb2.next()) {
-                    if (triggersdb1.getString("TRIGGER_NAME").equals(triggersdb2.getString("TRIGGER_NAME")) ||
-                        triggersdb1.getString("ACTION_TIMING").equals(triggersdb2.getString("ACTION_TIMING"))) {
-                            System.out.println("The triggers "+db1_name+"/"+(triggersdb1.getString("TRIGGER_NAME"))+" and "+db2_name+"/"+(triggersdb2.getString("TRIGGER_NAME"))+" are the same");
-                            System.out.println(" ---- ");
-                    }
+            while(triggersdb2.next() && !describedTrigg) {
+                trigg1Name = triggersdb1.getString("TRIGGER_NAME");
+                trigg2Name = triggersdb2.getString("TRIGGER_NAME");
+                trigg1ActionT = triggersdb1.getString("ACTION_TIMING");
+                trigg2ActionT = triggersdb2.getString("ACTION_TIMING");
+                if (trigg1Name.equals(trigg2Name) && trigg1ActionT.equals(trigg2ActionT)){
+                    System.out.println("THE TRIGGERS FROM TABLES NAMED: "+table1Name+" ARE THE SAME");
+                    System.out.println(" ");
+                    System.out.println("Trigger name: "+trigg1Name);
+                    System.out.println("action timing: "+trigg1ActionT);
+                    System.out.println(" ---- ");
+                    describedTrigg = true;
+                    commonTriggers.add(trigg1Name);
                 }
-                triggersdb2.beforeFirst();
+                if (trigg1Name.equals(trigg2Name) && !trigg1ActionT.equals(trigg2ActionT)){
+                    System.out.println("THE TRIGGERS FROM TABLES NAMED: "+table1Name+" HAVE THE SAME NAME: "+trigg1Name);
+                    System.out.println(" ");
+                    System.out.println("BUT DIFFERENT SHOOTING MOMENTS");
+                    System.out.println("Shooting moment trigger1: "+trigg1ActionT);
+                    System.out.println("Shooting moment trigger2: "+trigg2ActionT);
+                    System.out.println(" ---- ");
+                    describedTrigg = true;
+                    commonTriggers.add(trigg1Name);
+                    equalsdb = false;
+                }
             }
-        } 
-        catch(SQLException sqle) {
-            sqle.printStackTrace();
-            System.err.println("Error connecting: " + sqle);
+            // aditional trigger from first table
+            if (!describedTrigg) {
+                getInfoTrigger(triggersdb1);
+                equalsdb = false;
+            }
         }
+        // aditional triggers from second table
+        triggersdb2.beforeFirst();
+        while(triggersdb2.next()) {
+            trigg2Name = triggersdb2.getString("TRIGGER_NAME");
+            if (!commonTriggers.contains(trigg2Name)) {
+                getInfoTrigger(triggersdb2);
+                equalsdb = false;
+            }
+        }
+        return equalsdb;
     }
 }
