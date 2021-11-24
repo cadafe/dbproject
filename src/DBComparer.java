@@ -204,6 +204,8 @@ public class DBComparer {
                         }
                         equalsDB = compareForeignKeys(metaData1, metaData2, table1Name, table2Name, equalsDB);
                         equalsDB = compareTriggers(table1Name, table2Name, stm1, stm2, db1_name, db2_name, equalsDB);
+                        compareIndex(metaData1, metaData2, table1Name, table2Name);
+
                     }
                 }
                 // case of aditional table in tablesdb1
@@ -569,5 +571,40 @@ public class DBComparer {
             }
         }
         return equalsdb;
+    }
+
+    private static void compareIndex(DatabaseMetaData metaData1, DatabaseMetaData metaData2, 
+    String table1Name, String table2Name) throws SQLException {
+        ResultSet uniqueKey1 = metaData1.getIndexInfo(null, null, table1Name, true, false);
+        ResultSet uniqueKey2 = metaData1.getIndexInfo(null, null, table2Name, true, false);
+        Set<String> commonKeys = new HashSet<String>();
+        Boolean describedUk = true, isUniqueKey1, isUniqueKey2;
+
+        String column1, column2, name1, name2;
+
+        while(uniqueKey1.next()) {
+            describedUk = false;
+            uniqueKey2.beforeFirst();
+            while(uniqueKey2.next() && !describedUk) {
+                column1 = uniqueKey1.getString("COLUMN_NAME");
+                column2 = uniqueKey2.getString("COLUMN_NAME");
+                name1 = uniqueKey1.getString("INDEX_NAME");
+                name2 = uniqueKey2.getString("INDEX_NAME");
+                isUniqueKey1 = column1.equals(name1);
+                isUniqueKey2 = column2.equals(name2);
+                // INFORMAR DIFERENCIA ENTRE CLAVES UNICAS NO IGUALDAD!!!!!
+                if (column1.equals(column2) && isUniqueKey1 && isUniqueKey2) {
+                    System.out.println(" ");
+                    System.out.println(" COMMON COLUMN "+table1Name+"/"+column1+" SHARE UNIQUE CONSTRAINT");
+                    System.out.println(" ");
+
+                }
+
+                
+            }
+        }
+
+
+
     }
 }
