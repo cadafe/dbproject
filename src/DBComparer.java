@@ -204,7 +204,7 @@ public class DBComparer {
                         }
                         equalsDB = compareForeignKeys(metaData1, metaData2, table1Name, table2Name, equalsDB);
                         equalsDB = compareTriggers(table1Name, table2Name, stm1, stm2, db1_name, db2_name, equalsDB);
-                        compareIndex(metaData1, metaData2, table1Name, table2Name);
+                        equalsDB = compareIndex(metaData1, metaData2, table1Name, table2Name, db1_name, db2_name, equalsDB);
 
                     }
                 }
@@ -573,38 +573,66 @@ public class DBComparer {
         return equalsdb;
     }
 
-    private static void compareIndex(DatabaseMetaData metaData1, DatabaseMetaData metaData2, 
-    String table1Name, String table2Name) throws SQLException {
-        ResultSet uniqueKey1 = metaData1.getIndexInfo(null, null, table1Name, true, false);
-        ResultSet uniqueKey2 = metaData1.getIndexInfo(null, null, table2Name, true, false);
+    private static Boolean compareIndex(DatabaseMetaData metaData1, DatabaseMetaData metaData2, 
+    String table1Name, String table2Name, String db1_name, String db2_name, Boolean qdb) throws SQLException {
+        ResultSet indexInf1 = metaData1.getIndexInfo(db1_name, null, table1Name, false, false);
+        ResultSet indexInf2 = metaData1.getIndexInfo(db2_name, null, table2Name, false, false);
         Set<String> commonKeys = new HashSet<String>();
-        Boolean describedUk = true, isUniqueKey1, isUniqueKey2;
-
+        Boolean describedUk = true, isindexInf1, isindexInf2, notPrimaryInd1, notPrimaryInd2;
+        Boolean equalsDB = qdb;
         String column1, column2, name1, name2;
 
-        while(uniqueKey1.next()) {
+        while(indexInf1.next()) {
             describedUk = false;
-            uniqueKey2.beforeFirst();
-            while(uniqueKey2.next() && !describedUk) {
-                column1 = uniqueKey1.getString("COLUMN_NAME");
-                column2 = uniqueKey2.getString("COLUMN_NAME");
-                name1 = uniqueKey1.getString("INDEX_NAME");
-                name2 = uniqueKey2.getString("INDEX_NAME");
-                isUniqueKey1 = column1.equals(name1);
-                isUniqueKey2 = column2.equals(name2);
-                // INFORMAR DIFERENCIA ENTRE CLAVES UNICAS NO IGUALDAD!!!!!
-                if (column1.equals(column2) && isUniqueKey1 && isUniqueKey2) {
-                    System.out.println(" ");
+            column1 = indexInf1.getString("COLUMN_NAME");
+            name1 = indexInf1.getString("INDEX_NAME");
+            isindexInf1 = column1.equals(name1);
+            notPrimaryInd1 = !name1.equals("PRIMARY");
+            indexInf2.beforeFirst();
+            while(indexInf2.next() && !describedUk) {
+                column2 = indexInf2.getString("COLUMN_NAME");
+                name2 = indexInf2.getString("INDEX_NAME");
+                isindexInf2 = column2.equals(name2);
+                notPrimaryInd2 = !name2.equals("PRIMARY");
+
+                if (column1.equals(column2) && isindexInf1 && isindexInf2) {
                     System.out.println(" COMMON COLUMN "+table1Name+"/"+column1+" SHARE UNIQUE CONSTRAINT");
                     System.out.println(" ");
-
-                }
-
-                
+                    describedUk = true;
+                    commonKeys.add(name1);
+                }                
+            }
+            // case of aditional not primary index into first table
+            if (!describedUk && notPrimaryInd1 && !isindexInf1) {
+                System.out.println(" ADITIONAL INDEX INTO FIRST TABLE COLUMN "+table1Name+"/"+column1);
+                System.out.println(" Name: "+name1);
+                System.out.println(" ");
+                equalsDB = false;
+            }
+            if (!describedUk && isindexInf1) {
+                System.out.println(" ADITIONAL UNIQUE CONSTRAINT INTO FIRST TABLE COLUMN "+table1Name+"/"+column1);
+                System.out.println(" ");
+                equalsDB = false;
             }
         }
-
-
-
+        indexInf2.beforeFirst();
+        while(indexInf2.next()) {
+            column2 = indexInf2.getString("COLUMN_NAME");
+            name2 = indexInf2.getString("INDEX_NAME");
+            isindexInf2 = column2.equals(name2);
+            notPrimaryInd2 = !name2.equals("PRIMARY");
+            if (!commonKeys.contains(name2) && notPrimaryInd2 && !isindexInf2) {
+                System.out.println(" ADITIONAL INDEX INTO SECOND TABLE COLUMN "+table2Name+"/"+column2);
+                System.out.println(" Name: "+name2);
+                System.out.println(" ");
+                equalsDB = false;
+            }
+            if (!commonKeys.contains(name2) && isindexInf2) {
+                System.out.println(" ADITIONAL UNIQUE CONSTRAINT INTO SECOND TABLE COLUMN "+table2Name+"/"+column2);
+                System.out.println(" ");
+                equalsDB = false;
+            }
+        }
+        return equalsDB;
     }
 }
